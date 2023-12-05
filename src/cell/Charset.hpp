@@ -8,9 +8,52 @@
 
 namespace cell {
 
-[[nodiscard]] constexpr bool IsLower(const uint8_t byte) noexcept { return byte >= 0x61 && byte <= 0x7a; }
+constexpr uint8_t kSP = 0x20;
+constexpr uint8_t kLF = 0x0A;
+constexpr uint8_t kCR = 0x0D;
+constexpr uint8_t kHTAB = 0x09;
 
-[[nodiscard]] constexpr bool IsUpper(const uint8_t byte) noexcept { return byte >= 0x41 && byte <= 0x5a; }
+[[nodiscard]] constexpr bool IsLower(const uint8_t byte) noexcept {
+  return byte >= 0x61 && byte <= 0x7a;
+}
+
+[[nodiscard]] constexpr bool IsUpper(const uint8_t byte) noexcept {
+  return byte >= 0x41 && byte <= 0x5a;
+}
+
+[[nodiscard]] constexpr bool IsAlpha(const uint8_t byte) noexcept {
+  return IsLower(byte) || IsUpper(byte);
+}
+
+[[nodiscard]] constexpr bool IsDigit(const uint8_t byte) noexcept {
+  return byte >= 0x30 && byte <= 0x39;
+}
+
+[[nodiscard]] constexpr bool IsHexUppercase(const uint8_t byte) noexcept {
+  return IsDigit(byte) || (byte >= 0x41 && byte <= 0x46);
+}
+
+[[nodiscard]] constexpr bool IsHex(const uint8_t byte) noexcept {
+  return IsHexUppercase(byte) || (byte >= 0x61 && byte <= 0x66);
+}
+
+[[nodiscard]] constexpr bool IsWhitespace(const uint8_t byte) noexcept {
+  return byte == kSP || byte == kHTAB || byte == kCR || byte == kLF | byte == '\v' ||
+         byte == '\f' || byte == '\b';
+}
+
+[[nodiscard]] constexpr bool Rfc9110_IsWhitespace(const uint8_t byte) noexcept {
+  return byte == kSP || byte == kHTAB;
+}
+
+[[nodiscard]] constexpr bool Rfc9110_IsTChar(const uint8_t byte) noexcept {
+  return IsAlpha(byte) || IsDigit(byte) || byte == '!' || byte == '#' || byte == '$' ||
+         byte == '%' || byte == '\'' || byte == '_' || byte == '`' || byte == '|' || byte == '~';
+}
+
+[[nodiscard]] constexpr bool Rfc9110_IsObsText(const uint8_t byte) noexcept {
+  return byte >= 0x80 && byte <= 0xFF;
+}
 
 [[nodiscard]] constexpr uint8_t ToLower(const uint8_t byte) noexcept {
   if (IsUpper(byte)) {

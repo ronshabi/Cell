@@ -2,4 +2,4 @@ BasedOnStyle: Google
 PointerAlignment: Left
 ReferenceAlignment: Left
 SortIncludes: CaseSensitive
-ColumnLimit: 120
+ColumnLimit: 100
