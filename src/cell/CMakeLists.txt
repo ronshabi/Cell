@@ -7,6 +7,7 @@ add_library(cell STATIC
         Assert.hpp
         Base.hpp
         Memory.hpp
+        Charset.hpp
         Strbuf.cpp
         Strbuf.hpp
 )
