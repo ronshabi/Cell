@@ -72,17 +72,17 @@ class Strbuf {
   void AppendCString(const char *cstr) noexcept;
   void AppendStringView(std::string_view sv) noexcept;
   void AppendStrbuf(const Strbuf &other) noexcept;
-  void AppendInt32(const std::int32_t num) noexcept { AppendSprintf<32>("%ld", num); }
-  void AppendInt64(const std::int64_t num) noexcept { AppendSprintf<32>("%lld", num); }
-  void AppendUInt32(const std::uint32_t num) noexcept { AppendSprintf<32>("%lu", num); }
-  void AppendUInt64(const std::uint64_t num) noexcept { AppendSprintf<32>("%llu", num); }
+  void AppendInt32(const int32_t num) noexcept { AppendSprintf<32>("%ld", num); }
+  void AppendInt64(const int64_t num) noexcept { AppendSprintf<32>("%lld", num); }
+  void AppendUInt32(const uint32_t num) noexcept { AppendSprintf<32>("%lu", num); }
+  void AppendUInt64(const uint64_t num) noexcept { AppendSprintf<32>("%llu", num); }
 
   [[nodiscard]] bool AppendFileContents(const char *path) noexcept;
   [[nodiscard]] bool SaveToFile(const char *path) const noexcept;
 
   // The printf buffer you will append to is fixed, and is determined by
   // the PrintfBufferSize template argument. Use with caution.
-  template <std::size_t SprintfBufferSize, typename... Args>
+  template <uint64_t SprintfBufferSize, typename... Args>
   void AppendSprintf(const char *fmt, Args &&...args) noexcept {
     char tmp[SprintfBufferSize];
     memset(tmp, 0, SprintfBufferSize);
