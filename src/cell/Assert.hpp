@@ -3,6 +3,12 @@
 
 #include <cstdio>
 
+#define CELL_PANIC(message)                                                       \
+  {                                                                               \
+    printf("[CELL_PANIC] %s -- %s:%d\n", message, __PRETTY_FUNCTION__, __LINE__); \
+    __builtin_unreachable();                                                      \
+  }
+
 #ifdef DEBUG
 
 #define CELL_ASSERT(expr)                                                        \
