@@ -13,7 +13,6 @@
   }
 
 #ifdef DEBUG
-
 #define CELL_ASSERT(expr)                                                        \
   {                                                                              \
     if (!(expr)) [[unlikely]] {                                                  \
