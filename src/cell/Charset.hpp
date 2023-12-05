@@ -8,10 +8,29 @@
 
 namespace cell {
 
+enum class Charset {
+  Ascii,
+  Utf8,
+};
+
 constexpr uint8_t kSP = 0x20;
 constexpr uint8_t kLF = 0x0A;
 constexpr uint8_t kCR = 0x0D;
 constexpr uint8_t kHTAB = 0x09;
+
+constexpr const char *kAsciiLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+constexpr const char *kAsciiUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+constexpr const char *kAsciiLower = "abcdefghijklmnopqrstuvwxyz";
+constexpr const char *kDigits = "0123456789";
+constexpr const char *kHexDigitsLower = "0123456789abcdef";
+constexpr const char *kHexDigitsUpper = "0123456789ABCDEF";
+constexpr const char *kHexDigits = "0123456789abcdefABCDEF";
+constexpr const char *kOctalDigits = "01234567";
+constexpr const char *kAsciiPrintableStrict =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&\'("
+    ")*+,-./:;<=>?@[\\]^_`{|}~ \t\n";
+constexpr const char *kAsciiPunct = R"(!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~)";
+constexpr const char *kAsciiWhitespace = " \n\t\r\f\v";
 
 [[nodiscard]] constexpr bool IsLower(const uint8_t byte) noexcept {
   return byte >= 0x61 && byte <= 0x7a;
