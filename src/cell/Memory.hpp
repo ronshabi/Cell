@@ -4,14 +4,15 @@
 #ifndef CELL_MEMORY_HPP
 #define CELL_MEMORY_HPP
 
-#include "cell/Assert.hpp"
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 
+#include "cell/Assert.hpp"
+
 namespace cell {
 
-template<typename T>
+template <typename T>
 [[nodiscard]] inline T* Malloc(const uint64_t bytes) noexcept {
   CELL_ASSERT(bytes != 0);
 
@@ -23,7 +24,7 @@ template<typename T>
   return ptr;
 }
 
-template<typename T>
+template <typename T>
 [[nodiscard]] inline T* Realloc(T* ptr, uint64_t new_size) noexcept {
   if (ptr == nullptr) [[unlikely]] {
     CELL_PANIC("cell::Realloc was called with a null pointer")
@@ -40,7 +41,7 @@ template<typename T>
 }
 
 inline void Free(void* ptr) noexcept {
-  if (ptr) {
+  if (ptr) [[likely]] {
     ::free(ptr);
   }
 }
@@ -74,15 +75,16 @@ inline bool MemCompare(const void* ptr0, const void* ptr1, const uint64_t length
   return ::memcmp(ptr0, ptr1, length) == 0;
 }
 
-inline bool MemCopy(void* dest, const void* src, const uint64_t length) noexcept {
+inline void MemCopy(void* dest, const void* src, const uint64_t length) noexcept {
   if (dest == nullptr || src == nullptr) [[unlikely]] {
     CELL_PANIC("cell::MemCpy was called with a nullptr")
   }
 
   CELL_ASSERT(length != 0);
-  return ::memcpy(dest, src, length);
+  ::memcpy(dest, src, length);
 }
 
+[[nodiscard]] inline uint64_t Strlen(const char* str) noexcept { return strlen(str); }
 
 }  // namespace cell
 
