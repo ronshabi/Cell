@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef CELL_BASE_HPP
 #define CELL_BASE_HPP
 
