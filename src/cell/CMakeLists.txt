@@ -5,6 +5,8 @@ MESSAGE(STATUS "[CELL] Library Include Directory: " ${CMAKE_CURRENT_SOURCE_DIR}/
 
 add_library(cell STATIC
         Assert.hpp
+        Base.hpp
+        Memory.hpp
         Strbuf.cpp
         Strbuf.hpp
 )
