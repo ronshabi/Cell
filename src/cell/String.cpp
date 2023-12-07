@@ -1,13 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#include "Strbuf.hpp"
+#include "String.hpp"
 
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include <cstdint>
 
 #include "Charset.hpp"
 #include "cell/Assert.hpp"
@@ -20,27 +18,30 @@ namespace cell {
 // Constructors/Destructors
 // -----------------------------------------------------------------------------
 
-Strbuf::Strbuf(uint64_t cap) noexcept : cap_(RoundUp8(cap)), len_(0), buf_(Malloc<uint8_t>(cap_)) {
+String::String() noexcept : String(8) {}
+
+String::String(uint64_t initial_capacity_hint) noexcept
+    : cap_(RoundUp8(initial_capacity_hint)), len_(0), buf_(Malloc<uint8_t>(cap_)) {
   MemZero(buf_, cap_);
 }
 
-Strbuf::Strbuf(const Strbuf &other) noexcept
+String::String(const String &other) noexcept
     : cap_(other.cap_), len_(other.len_), buf_(Malloc<uint8_t>(other.cap_)) {
   MemCopy(buf_, other.buf_, other.cap_);
 }
 
-Strbuf::Strbuf(Strbuf &&other) noexcept : cap_(other.cap_), len_(other.len_), buf_(other.buf_) {
+String::String(String &&other) noexcept : cap_(other.cap_), len_(other.len_), buf_(other.buf_) {
   CELL_ASSERT(other.buf_ != nullptr);
   other.buf_ = nullptr;
 }
 
-Strbuf::~Strbuf() { Free(buf_); }
+String::~String() { Free(buf_); }
 
 // -----------------------------------------------------------------------------
 // Assignment Operators
 // -----------------------------------------------------------------------------
 
-Strbuf &Strbuf::operator=(const Strbuf &other) noexcept {
+String &String::operator=(const String &other) noexcept {
   Grow(other.cap_);
   len_ = other.len_;
   MemCopy(buf_, other.buf_, other.len_);
@@ -48,7 +49,7 @@ Strbuf &Strbuf::operator=(const Strbuf &other) noexcept {
   return *this;
 }
 
-Strbuf &Strbuf::operator=(Strbuf &&other) noexcept {
+String &String::operator=(String &&other) noexcept {
   CELL_ASSERT(other.buf_ != nullptr);
   MemZero(buf_, cap_);
   Free(buf_);
@@ -62,23 +63,23 @@ Strbuf &Strbuf::operator=(Strbuf &&other) noexcept {
 // Public Functions
 // -----------------------------------------------------------------------------
 
-bool Strbuf::Compare(const char *cstr) const noexcept {
+bool String::Compare(const char *cstr) const noexcept {
   return len_ == Strlen(cstr) && compare(cstr, len_, 0);
 }
 
-bool Strbuf::Compare(std::string_view str) const noexcept {
+bool String::Compare(std::string_view str) const noexcept {
   return len_ == str.size() && compare(str.data(), len_, 0);
 }
 
-bool Strbuf::CompareIgnoreCase(const char *cstr) const noexcept {
+bool String::CompareIgnoreCase(const char *cstr) const noexcept {
   return len_ == Strlen(cstr) && compareIgnoreCase(cstr, len_, 0);
 }
 
-bool Strbuf::CompareIgnoreCase(std::string_view sv) const noexcept {
+bool String::CompareIgnoreCase(std::string_view sv) const noexcept {
   return len_ == sv.size() && compareIgnoreCase(sv.data(), len_, 0);
 }
 
-bool Strbuf::Contains(uint8_t byte) const noexcept {
+bool String::Contains(uint8_t byte) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (buf_[i] == byte) {
       return true;
@@ -88,7 +89,7 @@ bool Strbuf::Contains(uint8_t byte) const noexcept {
   return false;
 }
 
-bool Strbuf::Contains(const char *cstr) const noexcept {
+bool String::Contains(const char *cstr) const noexcept {
   const uint64_t l = Strlen(cstr);
 
   for (uint64_t i = 0; i < len_; i++) {
@@ -100,7 +101,7 @@ bool Strbuf::Contains(const char *cstr) const noexcept {
   return false;
 }
 
-bool Strbuf::Contains(const std::string_view sv) const noexcept {
+bool String::Contains(const std::string_view sv) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (compare(sv.data(), sv.size(), i)) {
       return true;
@@ -110,7 +111,7 @@ bool Strbuf::Contains(const std::string_view sv) const noexcept {
   return false;
 }
 
-bool Strbuf::ContainsIgnoreCase(const char *cstr) const noexcept {
+bool String::ContainsIgnoreCase(const char *cstr) const noexcept {
   const uint64_t l = Strlen(cstr);
 
   for (uint64_t i = 0; i < len_; i++) {
@@ -122,7 +123,7 @@ bool Strbuf::ContainsIgnoreCase(const char *cstr) const noexcept {
   return false;
 }
 
-bool Strbuf::ContainsIgnoreCase(const std::string_view sv) const noexcept {
+bool String::ContainsIgnoreCase(const std::string_view sv) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (compareIgnoreCase(sv.data(), sv.size(), i)) {
       return true;
@@ -132,7 +133,7 @@ bool Strbuf::ContainsIgnoreCase(const std::string_view sv) const noexcept {
   return false;
 }
 
-bool Strbuf::ContainsAnyOf(const char *charset) const noexcept {
+bool String::ContainsAnyOf(const char *charset) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (isAnyOf(buf_[i], charset)) {
       return true;
@@ -142,7 +143,7 @@ bool Strbuf::ContainsAnyOf(const char *charset) const noexcept {
   return false;
 }
 
-bool Strbuf::ContainsAnyOf(const std::unordered_set<uint8_t> &charset) const noexcept {
+bool String::ContainsAnyOf(const std::unordered_set<uint8_t> &charset) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (charset.contains(buf_[i])) {
       return true;
@@ -152,7 +153,7 @@ bool Strbuf::ContainsAnyOf(const std::unordered_set<uint8_t> &charset) const noe
   return false;
 }
 
-bool Strbuf::ContainsJust(const char *charset) const noexcept {
+bool String::ContainsJust(const char *charset) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (!isAnyOf(buf_[i], charset)) {
       return false;
@@ -162,7 +163,7 @@ bool Strbuf::ContainsJust(const char *charset) const noexcept {
   return true;
 }
 
-bool Strbuf::ContainsJust(const std::unordered_set<uint8_t> &charset) const noexcept {
+bool String::ContainsJust(const std::unordered_set<uint8_t> &charset) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (!charset.contains(buf_[i])) {
       return false;
@@ -172,7 +173,7 @@ bool Strbuf::ContainsJust(const std::unordered_set<uint8_t> &charset) const noex
   return true;
 }
 
-void Strbuf::ReplaceChar(const uint8_t original, const uint8_t replacement) noexcept {
+void String::ReplaceChar(const uint8_t original, const uint8_t replacement) noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (buf_[i] == original) {
       buf_[i] = replacement;
@@ -180,7 +181,7 @@ void Strbuf::ReplaceChar(const uint8_t original, const uint8_t replacement) noex
   }
 }
 
-void Strbuf::ReplaceAnyOfChars(const char *charset, const uint8_t replacement) noexcept {
+void String::ReplaceAnyOfChars(const char *charset, const uint8_t replacement) noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (isAnyOf(buf_[i], charset)) {
       buf_[i] = replacement;
@@ -188,8 +189,8 @@ void Strbuf::ReplaceAnyOfChars(const char *charset, const uint8_t replacement) n
   }
 }
 
-void Strbuf::Replace(const char *candidate, const char *replacement) noexcept {
-  Strbuf modified(cap_);
+void String::Replace(const char *candidate, const char *replacement) noexcept {
+  String modified(cap_);
   const uint64_t candidate_length = Strlen(candidate);
 
   uint64_t i = 0;
@@ -206,13 +207,13 @@ void Strbuf::Replace(const char *candidate, const char *replacement) noexcept {
   *this = std::move(modified);
 }
 
-void Strbuf::ReplaceAnyOf(const std::vector<const char *> &candidates,
+void String::ReplaceAnyOf(const std::vector<const char *> &candidates,
                           const char *replacement) noexcept {
   if (candidates.empty()) [[unlikely]] {
     return;
   }
 
-  Strbuf modified(cap_);
+  String modified(cap_);
 
   const uint64_t candidates_amt = candidates.size();
   std::vector<uint64_t> candidates_lengths;
@@ -239,9 +240,9 @@ void Strbuf::ReplaceAnyOf(const std::vector<const char *> &candidates,
   *this = std::move(modified);
 }
 
-void Strbuf::ReplaceHashmap(
+void String::ReplaceHashmap(
     const std::unordered_map<const char *, const char *> &hashmap) noexcept {
-  Strbuf modified(cap_);
+  String modified(cap_);
   std::unordered_map<const char *, uint64_t> lengths;
 
   for (const auto [k, v] : hashmap) {
@@ -265,19 +266,19 @@ void Strbuf::ReplaceHashmap(
   *this = std::move(modified);
 }
 
-bool Strbuf::StartsWithChar(const uint8_t byte) const noexcept { return buf_[0] == byte; }
+bool String::StartsWithChar(const uint8_t byte) const noexcept { return buf_[0] == byte; }
 
-bool Strbuf::StartsWithAnyOfChars(const char *charset) const noexcept {
+bool String::StartsWithAnyOfChars(const char *charset) const noexcept {
   return isAnyOf(buf_[0], charset);
 }
 
-bool Strbuf::StartsWith(const char *cstr) const noexcept { return compare(cstr, Strlen(cstr), 0); }
+bool String::StartsWith(const char *cstr) const noexcept { return compare(cstr, Strlen(cstr), 0); }
 
-bool Strbuf::StartsWithIgnoreCase(const char *cstr) const noexcept {
+bool String::StartsWithIgnoreCase(const char *cstr) const noexcept {
   return compareIgnoreCase(cstr, Strlen(cstr), 0);
 }
 
-bool Strbuf::EndsWithChar(const uint8_t byte) const noexcept {
+bool String::EndsWithChar(const uint8_t byte) const noexcept {
   if (len_ == 0) [[unlikely]] {
     return false;
   }
@@ -285,7 +286,7 @@ bool Strbuf::EndsWithChar(const uint8_t byte) const noexcept {
   return buf_[len_ - 1] == byte;
 }
 
-bool Strbuf::EndsWithAnyOfChars(const char *charset) const noexcept {
+bool String::EndsWithAnyOfChars(const char *charset) const noexcept {
   if (len_ == 0) [[unlikely]] {
     return false;
   }
@@ -293,24 +294,24 @@ bool Strbuf::EndsWithAnyOfChars(const char *charset) const noexcept {
   return isAnyOf(buf_[len_ - 1], charset);
 }
 
-void Strbuf::ToLower() noexcept {
+void String::ToLower() noexcept {
   for (uint64_t i = 0; i < len_; ++i) {
     buf_[i] = cell::ToLower(buf_[i]);
   }
 }
 
-void Strbuf::ToUpper() noexcept {
+void String::ToUpper() noexcept {
   for (uint64_t i = 0; i < len_; ++i) {
     buf_[i] = cell::ToUpper(buf_[i]);
   }
 }
 
-void Strbuf::Trim(const uint8_t delimiter) noexcept {
+void String::Trim(const uint8_t delimiter) noexcept {
   TrimRight(delimiter);
   TrimLeft(delimiter);
 }
 
-void Strbuf::TrimLeft(const uint8_t delimiter) noexcept {
+void String::TrimLeft(const uint8_t delimiter) noexcept {
   uint8_t *begin = buf_;
   uint8_t *end = buf_ + len_;
 
@@ -325,7 +326,7 @@ void Strbuf::TrimLeft(const uint8_t delimiter) noexcept {
   len_ = new_length;
 }
 
-void Strbuf::TrimRight(const uint8_t delimiter) noexcept {
+void String::TrimRight(const uint8_t delimiter) noexcept {
   if (len_ == 0) {
     return;
   }
@@ -342,12 +343,12 @@ void Strbuf::TrimRight(const uint8_t delimiter) noexcept {
 
 // Clears contents and resets len_
 // Does not deallocate reserved memory
-void Strbuf::Clear() noexcept {
+void String::Clear() noexcept {
   MemZero(buf_, cap_);
   len_ = 0;
 }
 
-void Strbuf::AppendChar(uint8_t c) noexcept {
+void String::AppendChar(uint8_t c) noexcept {
   if (len_ + 1 == cap_) [[unlikely]] {
     Grow(cap_ * 2);
   }
@@ -367,7 +368,7 @@ void Strbuf::AppendChar(uint8_t c) noexcept {
 //                                    ^
 //                                    len_ still points at 0, like it should
 //
-void Strbuf::AppendCString(const char *cstr) noexcept {
+void String::AppendCString(const char *cstr) noexcept {
   const uint64_t l = strlen(cstr);
 
   if (len_ + l >= cap_) [[unlikely]] {
@@ -379,7 +380,7 @@ void Strbuf::AppendCString(const char *cstr) noexcept {
   buf_[len_] = 0;
 }
 
-void Strbuf::AppendStringView(std::string_view sv) noexcept {
+void String::AppendStringView(std::string_view sv) noexcept {
   const auto l = sv.size();
 
   if (len_ + l >= cap_) [[unlikely]] {
@@ -391,7 +392,7 @@ void Strbuf::AppendStringView(std::string_view sv) noexcept {
   buf_[len_] = 0;
 }
 
-void Strbuf::AppendStrbuf(const Strbuf &other) noexcept {
+void String::AppendString(const String &other) noexcept {
   const uint64_t l = other.len_;
 
   if (len_ + l >= cap_) [[unlikely]] {
@@ -403,7 +404,7 @@ void Strbuf::AppendStrbuf(const Strbuf &other) noexcept {
   buf_[len_] = 0;
 }
 
-bool Strbuf::AppendFileContents(const char *path) noexcept {
+bool String::AppendFileContents(const char *path) noexcept {
   constexpr int fd_error = -1;
   constexpr int fstat_error = -1;
 
@@ -437,7 +438,7 @@ bool Strbuf::AppendFileContents(const char *path) noexcept {
   return true;
 }
 
-bool Strbuf::SaveToFile(const char *path) const noexcept {
+bool String::SaveToFile(const char *path) const noexcept {
   constexpr int fd_error = -1;
 
   const int fd = ::open(path, O_WRONLY | O_CREAT, 00644);
@@ -461,7 +462,7 @@ bool Strbuf::SaveToFile(const char *path) const noexcept {
   return true;
 }
 
-void Strbuf::Grow(const uint64_t new_cap) {
+void String::Grow(const uint64_t new_cap) {
   if (new_cap < cap_) [[unlikely]] {
     return;
   }
@@ -470,9 +471,9 @@ void Strbuf::Grow(const uint64_t new_cap) {
   cap_ = new_cap;
 }
 
-void Strbuf::RefreshLength() noexcept { len_ = Strlen(reinterpret_cast<const char *>(buf_)); }
+void String::RefreshLength() noexcept { len_ = Strlen(reinterpret_cast<const char *>(buf_)); }
 
-const char *Strbuf::GetCStringTrimmedLeft(const uint8_t delimiter) const noexcept {
+const char *String::GetCStringTrimmedLeft(const uint8_t delimiter) const noexcept {
   uint8_t *begin = buf_;
 
   while (*begin == delimiter) {
@@ -486,7 +487,7 @@ const char *Strbuf::GetCStringTrimmedLeft(const uint8_t delimiter) const noexcep
 // Private Functions
 // -----------------------------------------------------------------------------
 
-bool Strbuf::compare(const char *cstr, const uint64_t length,
+bool String::compare(const char *cstr, const uint64_t length,
                      const uint64_t offset) const noexcept {
   if (offset + length > len_) {
     return false;
@@ -499,7 +500,7 @@ bool Strbuf::compare(const char *cstr, const uint64_t length,
   return MemCompare(cstr, buf_, length);
 }
 
-bool Strbuf::compareIgnoreCase(const char *cstr, const uint64_t length,
+bool String::compareIgnoreCase(const char *cstr, const uint64_t length,
                                const uint64_t offset) const noexcept {
   if (offset + length > len_) {
     return false;
@@ -521,7 +522,7 @@ bool Strbuf::compareIgnoreCase(const char *cstr, const uint64_t length,
   return true;
 }
 
-bool Strbuf::isAnyOf(const uint8_t candidate, const char *charset) noexcept {
+bool String::isAnyOf(const uint8_t candidate, const char *charset) noexcept {
   while (*charset) {
     if (*charset == candidate) {
       return true;

@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef CELL_STRBUF_HPP
-#define CELL_STRBUF_HPP
+#ifndef CELL_STRING_HPP
+#define CELL_STRING_HPP
 
 #include <cstdint>
 #include <cstdio>
@@ -16,14 +16,17 @@
 
 namespace cell {
 
-class Strbuf {
+class String {
  public:
-  explicit Strbuf(uint64_t cap) noexcept;
-  Strbuf(const Strbuf &other) noexcept;
-  Strbuf(Strbuf &&other) noexcept;
-  Strbuf &operator=(const Strbuf &other) noexcept;
-  Strbuf &operator=(Strbuf &&other) noexcept;
-  ~Strbuf();
+  friend class Scanner;
+
+  explicit String() noexcept;
+  explicit String(uint64_t initial_capacity_hint) noexcept;
+  String(const String &other) noexcept;
+  String(String &&other) noexcept;
+  String &operator=(const String &other) noexcept;
+  String &operator=(String &&other) noexcept;
+  ~String();
 
   [[nodiscard]] constexpr uint8_t *GetBufPtr() noexcept { return buf_; }
   [[nodiscard]] constexpr uint8_t *GetBufPtr() const noexcept { return buf_; }
@@ -57,10 +60,6 @@ class Strbuf {
   [[nodiscard]] bool EndsWithChar(uint8_t byte) const noexcept;
   [[nodiscard]] bool EndsWithAnyOfChars(const char *charset) const noexcept;
 
-  // TODO
-  //  [[nodiscard]] bool IsLower() const noexcept;
-  //  [[nodiscard]] bool IsUpper() const noexcept;
-
   void ToLower() noexcept;
   void ToUpper() noexcept;
   void Trim(uint8_t delimiter = ' ') noexcept;
@@ -71,17 +70,14 @@ class Strbuf {
   void AppendChar(uint8_t c) noexcept;
   void AppendCString(const char *cstr) noexcept;
   void AppendStringView(std::string_view sv) noexcept;
-  void AppendStrbuf(const Strbuf &other) noexcept;
+  void AppendString(const String &other) noexcept;
   void AppendInt32(const int32_t num) noexcept { AppendSprintf<32>("%ld", num); }
   void AppendInt64(const int64_t num) noexcept { AppendSprintf<32>("%lld", num); }
   void AppendUInt32(const uint32_t num) noexcept { AppendSprintf<32>("%lu", num); }
   void AppendUInt64(const uint64_t num) noexcept { AppendSprintf<32>("%llu", num); }
 
-  [[nodiscard]] bool AppendFileContents(const char *path) noexcept;
-  [[nodiscard]] bool SaveToFile(const char *path) const noexcept;
-
   // The printf buffer you will append to is fixed, and is determined by
-  // the PrintfBufferSize template argument. Use with caution.
+  // the SprintfBufferSize template argument. Use with caution.
   template <uint64_t SprintfBufferSize, typename... Args>
   void AppendSprintf(const char *fmt, Args &&...args) noexcept {
     char tmp[SprintfBufferSize];
@@ -89,6 +85,9 @@ class Strbuf {
     std::sprintf(tmp, fmt, std::forward<Args>(args)...);
     AppendCString(tmp);
   }
+
+  [[nodiscard]] bool AppendFileContents(const char *path) noexcept;
+  [[nodiscard]] bool SaveToFile(const char *path) const noexcept;
 
   void Grow(uint64_t new_cap);
   void RefreshLength() noexcept;
@@ -120,4 +119,4 @@ class Strbuf {
 
 }  // namespace cell
 
-#endif  // CELL_STRBUF_HPP
+#endif  // CELL_STRING_HPP

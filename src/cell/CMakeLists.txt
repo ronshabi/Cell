@@ -8,8 +8,9 @@ add_library(cell STATIC
         Base.hpp
         Memory.hpp
         Charset.hpp
-        Strbuf.cpp
-        Strbuf.hpp
-)
+        String.cpp
+        String.hpp
+        Scanner.cpp
+        Scanner.hpp)
 
 target_include_directories(cell PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)
