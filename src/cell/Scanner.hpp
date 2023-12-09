@@ -24,12 +24,15 @@ class Scanner {
   [[nodiscard]] uint8_t Peek() const noexcept;
   [[nodiscard]] uint8_t GetNextChar() noexcept;
   void Advance(uint64_t len = 1) noexcept;
-  uint64_t AdvanceSpace() noexcept;
-  uint64_t AdvanceAnyOf(const char* charset) noexcept;
-  uint64_t AdvanceUntilAnyOf(const char* charset) noexcept;
-  [[nodiscard]] uint8_t GetNextCharUntilAnyOf(const char* charset) noexcept;
-  [[nodiscard]] bool CompareWordAtCursor(const char* to) const noexcept;
-  [[nodiscard]] bool CompareWordAtCursorIgnoreCase(const char* to) const noexcept;
+
+  void ResetState() noexcept;
+  void AppendToBufferUntilHittingChar(String& outbuffer, uint8_t ch) noexcept;
+  bool AdvanceContinuousExactly(uint64_t amount, const uint8_t ch) noexcept;
+  //  uint64_t AdvanceAnyOf(StringSlice charset) noexcept;
+  //  uint64_t AdvanceUntilAnyOf(const char* charset) noexcept;
+  //  [[nodiscard]] uint8_t GetNextCharUntilAnyOf(const char* charset) noexcept;
+  //  [[nodiscard]] bool CompareWordAtCursor(const char* to) const noexcept;
+  //  [[nodiscard]] bool CompareWordAtCursorIgnoreCase(const char* to) const noexcept;
 
  private:
   uint64_t cursor_{0};

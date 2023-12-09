@@ -7,7 +7,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <cstdint>
+
 #include "Charset.hpp"
+#include "StringSlice.hpp"
+#include "WeakStringMap.hpp"
 #include "cell/Assert.hpp"
 #include "cell/Base.hpp"
 #include "cell/Memory.hpp"
@@ -23,6 +27,12 @@ String::String() noexcept : String(8) {}
 String::String(uint64_t initial_capacity_hint) noexcept
     : cap_(RoundUp8(initial_capacity_hint)), len_(0), buf_(Malloc<uint8_t>(cap_)) {
   MemZero(buf_, cap_);
+}
+
+String::String(StringSlice slice) noexcept
+    : cap_(RoundUp8(slice.GetLen())), len_(slice.GetLen()), buf_(Malloc<uint8_t>(slice.GetLen())) {
+  MemZero(buf_, cap_);
+  MemCopy(buf_, slice.GetU8Ptr(), len_);
 }
 
 String::String(const String &other) noexcept
@@ -65,20 +75,12 @@ String &String::operator=(String &&other) noexcept {
 // Public Functions
 // -----------------------------------------------------------------------------
 
-bool String::Compare(const char *cstr) const noexcept {
-  return len_ == Strlen(cstr) && compare(cstr, len_, 0);
+bool String::Compare(const StringSlice slice) const noexcept {
+  return len_ == slice.GetLen() && compare(slice.GetU8Ptr(), len_, 0);
 }
 
-bool String::Compare(std::string_view str) const noexcept {
-  return len_ == str.size() && compare(str.data(), len_, 0);
-}
-
-bool String::CompareIgnoreCase(const char *cstr) const noexcept {
-  return len_ == Strlen(cstr) && compareIgnoreCase(cstr, len_, 0);
-}
-
-bool String::CompareIgnoreCase(std::string_view sv) const noexcept {
-  return len_ == sv.size() && compareIgnoreCase(sv.data(), len_, 0);
+bool String::CompareIgnoreCase(const StringSlice slice) const noexcept {
+  return len_ == slice.GetLen() && compareIgnoreCase(slice.GetU8Ptr(), len_, 0);
 }
 
 bool String::Contains(uint8_t byte) const noexcept {
@@ -91,11 +93,9 @@ bool String::Contains(uint8_t byte) const noexcept {
   return false;
 }
 
-bool String::Contains(const char *cstr) const noexcept {
-  const uint64_t l = Strlen(cstr);
-
+bool String::Contains(const StringSlice slice) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
-    if (compare(cstr, l, i)) {
+    if (compare(slice.GetU8Ptr(), slice.GetLen(), i)) {
       return true;
     }
   }
@@ -103,9 +103,9 @@ bool String::Contains(const char *cstr) const noexcept {
   return false;
 }
 
-bool String::Contains(const std::string_view sv) const noexcept {
+bool String::ContainsIgnoreCase(const StringSlice slice) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
-    if (compare(sv.data(), sv.size(), i)) {
+    if (compareIgnoreCase(slice.GetU8Ptr(), slice.GetLen(), i)) {
       return true;
     }
   }
@@ -113,29 +113,7 @@ bool String::Contains(const std::string_view sv) const noexcept {
   return false;
 }
 
-bool String::ContainsIgnoreCase(const char *cstr) const noexcept {
-  const uint64_t l = Strlen(cstr);
-
-  for (uint64_t i = 0; i < len_; i++) {
-    if (compareIgnoreCase(cstr, l, i)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool String::ContainsIgnoreCase(const std::string_view sv) const noexcept {
-  for (uint64_t i = 0; i < len_; i++) {
-    if (compareIgnoreCase(sv.data(), sv.size(), i)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool String::ContainsAnyOf(const char *charset) const noexcept {
+bool String::ContainsAnyOf(const StringSlice charset) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (isAnyOf(buf_[i], charset)) {
       return true;
@@ -155,7 +133,7 @@ bool String::ContainsAnyOf(const std::unordered_set<uint8_t> &charset) const noe
   return false;
 }
 
-bool String::ContainsJust(const char *charset) const noexcept {
+bool String::ContainsJust(const StringSlice charset) const noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (!isAnyOf(buf_[i], charset)) {
       return false;
@@ -183,7 +161,7 @@ void String::ReplaceChar(const uint8_t original, const uint8_t replacement) noex
   }
 }
 
-void String::ReplaceAnyOfChars(const char *charset, const uint8_t replacement) noexcept {
+void String::ReplaceAnyOfChars(const StringSlice charset, const uint8_t replacement) noexcept {
   for (uint64_t i = 0; i < len_; i++) {
     if (isAnyOf(buf_[i], charset)) {
       buf_[i] = replacement;
@@ -191,15 +169,14 @@ void String::ReplaceAnyOfChars(const char *charset, const uint8_t replacement) n
   }
 }
 
-void String::Replace(const char *candidate, const char *replacement) noexcept {
+void String::Replace(const StringSlice candidate, const StringSlice replacement) noexcept {
   String modified(cap_);
-  const uint64_t candidate_length = Strlen(candidate);
 
   uint64_t i = 0;
   while (i < len_) {
-    if (compare(candidate, candidate_length, i)) {
-      modified.AppendCString(replacement);
-      i += candidate_length;
+    if (compare(candidate.GetU8Ptr(), candidate.GetLen(), i)) {
+      modified.AppendStringSlice(replacement);
+      i += candidate.GetLen();
     } else {
       modified.AppendChar(buf_[i]);
       ++i;
@@ -209,8 +186,8 @@ void String::Replace(const char *candidate, const char *replacement) noexcept {
   *this = std::move(modified);
 }
 
-void String::ReplaceAnyOf(const std::vector<const char *> &candidates,
-                          const char *replacement) noexcept {
+void String::ReplaceAnyOf(const std::vector<StringSlice> &candidates,
+                          const StringSlice replacement) noexcept {
   if (candidates.empty()) [[unlikely]] {
     return;
   }
@@ -218,21 +195,15 @@ void String::ReplaceAnyOf(const std::vector<const char *> &candidates,
   String modified(cap_);
 
   const uint64_t candidates_amt = candidates.size();
-  std::vector<uint64_t> candidates_lengths;
-  candidates_lengths.reserve(candidates_amt);
-
-  for (const char *candidate : candidates) {
-    candidates_lengths.push_back(Strlen(candidate));
-  }
 
   uint64_t i = 0;
   while (i < len_) {
     bool replaced = false;
 
     for (uint64_t k = 0; k < candidates_amt; ++k) {
-      if (compare(candidates[k], candidates_lengths[k], i)) {
-        modified.AppendCString(replacement);
-        i += candidates_lengths[k];
+      if (compare(candidates[k].GetU8Ptr(), candidates[k].GetLen(), i)) {
+        modified.AppendStringSlice(replacement);
+        i += candidates[k].GetLen();
         replaced = true;
         break;
       }
@@ -247,42 +218,18 @@ void String::ReplaceAnyOf(const std::vector<const char *> &candidates,
   *this = std::move(modified);
 }
 
-void String::ReplaceHashmap(
-    const std::unordered_map<const char *, const char *> &hashmap) noexcept {
-  String modified(cap_);
-  std::unordered_map<const char *, uint64_t> lengths;
-
-  for (const auto [k, v] : hashmap) {
-    lengths[k] = Strlen(k);
-  }
-
-  uint64_t i = 0;
-  while (i < len_) {
-    for (const auto [k, v] : hashmap) {
-      if (compare(k, lengths[k], i)) {
-        modified.AppendCString(v);
-        i += lengths[k];
-        break;
-      }
-    }
-
-    modified.AppendChar(buf_[i]);
-    ++i;
-  }
-
-  *this = std::move(modified);
-}
-
 bool String::StartsWithChar(const uint8_t byte) const noexcept { return buf_[0] == byte; }
 
-bool String::StartsWithAnyOfChars(const char *charset) const noexcept {
+bool String::StartsWithAnyOfChars(const StringSlice charset) const noexcept {
   return isAnyOf(buf_[0], charset);
 }
 
-bool String::StartsWith(const char *cstr) const noexcept { return compare(cstr, Strlen(cstr), 0); }
+bool String::StartsWith(const StringSlice slice) const noexcept {
+  return compare(slice.GetU8Ptr(), slice.GetLen(), 0);
+}
 
-bool String::StartsWithIgnoreCase(const char *cstr) const noexcept {
-  return compareIgnoreCase(cstr, Strlen(cstr), 0);
+bool String::StartsWithIgnoreCase(const StringSlice slice) const noexcept {
+  return compareIgnoreCase(slice.GetU8Ptr(), slice.GetLen(), 0);
 }
 
 bool String::EndsWithChar(const uint8_t byte) const noexcept {
@@ -293,7 +240,7 @@ bool String::EndsWithChar(const uint8_t byte) const noexcept {
   return buf_[len_ - 1] == byte;
 }
 
-bool String::EndsWithAnyOfChars(const char *charset) const noexcept {
+bool String::EndsWithAnyOfChars(const StringSlice charset) const noexcept {
   if (len_ == 0) [[unlikely]] {
     return false;
   }
@@ -366,12 +313,12 @@ void String::AppendChar(uint8_t c) noexcept {
 }
 
 // before appending:
-// *buf_ = 0000000000000000 (cap_ = 16, len_ = 0)
+// *data_buffer_ = 0000000000000000 (cap_ = 16, len_ = 0)
 //         ^
 //         len_
 //
 // example: appending "hello world" (strlen = 11)
-//  after memcpy: *buf_ = [hello world00000], len_ = 11
+//  after memcpy: *data_buffer_ = [hello world00000], len_ = 11
 //                                    ^
 //                                    len_ still points at 0, like it should
 //
@@ -391,14 +338,14 @@ void String::AppendCString(const char *cstr) noexcept {
   buf_[len_] = 0;
 }
 
-void String::AppendStringView(std::string_view sv) noexcept {
-  const auto l = sv.size();
+void String::AppendStringSlice(const StringSlice slice) noexcept {
+  const auto l = slice.GetLen();
 
   if (len_ + l >= cap_) [[unlikely]] {
     Grow(RoundUp8(len_ + l + 1));
   }
 
-  memcpy(reinterpret_cast<uint8_t *>(buf_ + len_), reinterpret_cast<const uint8_t *>(sv.data()), l);
+  memcpy(reinterpret_cast<uint8_t *>(buf_ + len_), slice.GetU8Ptr(), l);
   len_ += l;
   buf_[len_] = 0;
 }
@@ -479,7 +426,7 @@ void String::Grow(const uint64_t new_cap) {
   }
 
   buf_ = Realloc<uint8_t>(buf_, new_cap);
-//  MemZeroPtrRange(buf_ + len_, buf_ + new_cap);
+  //  MemZeroPtrRange(data_buffer_ + len_, data_buffer_ + new_cap);
   cap_ = new_cap;
 }
 
@@ -499,7 +446,7 @@ const char *String::GetCStringTrimmedLeft(const uint8_t delimiter) const noexcep
 // Private Functions
 // -----------------------------------------------------------------------------
 
-bool String::compare(const char *cstr, const uint64_t length,
+bool String::compare(const uint8_t *data, const uint64_t length,
                      const uint64_t offset) const noexcept {
   if (offset + length > len_) {
     return false;
@@ -509,10 +456,10 @@ bool String::compare(const char *cstr, const uint64_t length,
     return true;
   }
 
-  return MemCompare(cstr, buf_ + offset, length);
+  return MemCompare(data, buf_ + offset, length);
 }
 
-bool String::compareIgnoreCase(const char *cstr, const uint64_t length,
+bool String::compareIgnoreCase(const uint8_t *data, const uint64_t length,
                                const uint64_t offset) const noexcept {
   if (offset + length > len_) {
     return false;
@@ -523,8 +470,8 @@ bool String::compareIgnoreCase(const char *cstr, const uint64_t length,
   }
 
   for (uint64_t i = 0; i < length; ++i) {
-    const uint8_t a{cell::ToLower(buf_[i])};
-    const uint8_t b{cell::ToLower(buf_[i])};
+    const uint8_t a{cell::ToLower(data[i])};
+    const uint8_t b{cell::ToLower(buf_[i + offset])};
 
     if (a != b) {
       return false;
@@ -534,16 +481,36 @@ bool String::compareIgnoreCase(const char *cstr, const uint64_t length,
   return true;
 }
 
-bool String::isAnyOf(const uint8_t candidate, const char *charset) noexcept {
-  while (*charset) {
-    if (*charset == candidate) {
+bool String::isAnyOf(const uint8_t candidate, const StringSlice charset) noexcept {
+  uint8_t const *ptr = charset.GetU8Ptr();
+
+  while (*ptr) {
+    if (*ptr == candidate) {
       return true;
     }
 
-    ++charset;
+    ++ptr;
   }
 
   return false;
+}
+
+StringSlice String::SubSlice() const noexcept { return StringSlice{buf_, len_}; }
+
+StringSlice String::SubSlice(uint64_t from, uint64_t n) const noexcept {
+  if (from + n <= len_) [[likely]] {
+    return {buf_ + from, n};
+  }
+
+  return {buf_ + len_, 0};
+}
+
+StringSlice String::SubSlice(uint64_t from) const noexcept {
+  if (from < len_) [[likely]] {
+    return {buf_ + from, len_ - from};
+  }
+
+  return {buf_ + len_, 0};
 }
 
 }  // namespace cell

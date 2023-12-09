@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "Scanner.hpp"
+
 #include "Memory.hpp"
+#include "log/Log.hpp"
 
 namespace cell {
 
@@ -42,7 +44,6 @@ Scanner &Scanner::operator=(Scanner &&other) noexcept {
   return *this;
 }
 
-// HTTP___
 void Scanner::Advance(const uint64_t len) noexcept {
   if (cursor_ + len < string_->len_) [[likely]] {
     cursor_ += len;
@@ -51,55 +52,97 @@ void Scanner::Advance(const uint64_t len) noexcept {
   }
 }
 
-uint64_t Scanner::AdvanceSpace() noexcept {
-  uint64_t cnt = 0;
+void Scanner::ResetState() noexcept {
+  cursor_ = 0;
+  eof_ = false;
+}
 
-  while (!eof_ && Peek() == ' ') {
-    Advance();
-    ++cnt;
+void Scanner::AppendToBufferUntilHittingChar(String &outbuffer, uint8_t ch) noexcept {
+  while (true) {
+    const uint8_t current = GetNextChar();
+
+    if (eof_ || current == ch) {
+      break;
+    }
+
+    outbuffer.AppendChar(current);
+    //    CELL_LOG_DEBUG("Appending [%c]", current);
   }
-
-  return cnt;
 }
 
+bool Scanner::AdvanceContinuousExactly(uint64_t amount, const uint8_t ch) noexcept {
+  CELL_ASSERT(amount != 0);
 
-uint64_t Scanner::AdvanceAnyOf(const char *charset) noexcept {
-  uint64_t cnt = 0;
+  while (true) {
+    const uint8_t current = GetNextChar();
+    CELL_LOG_DEBUG("Cursor at (%lu/%lu) [0x%X]. Target: 0x%X Amount left: %lu, EOF: %d", cursor_,
+                   string_->len_, ch, current, amount, eof_);
+    if (!eof_ && current == ch) {
+      --amount;
+    }
 
-  while (!eof_ && String::isAnyOf(Peek(), charset)) {
-    Advance();
-    ++cnt;
+    if (eof_) {
+      return amount == 0;
+    }
+
+    if (amount == 0) {
+      return true;
+    }
+
+    return false;
   }
-
-  return cnt;
 }
 
-uint64_t Scanner::AdvanceUntilAnyOf(const char *charset) noexcept {
-  uint64_t cnt = 0;
+//
+// uint64_t Scanner::AdvanceSpace() noexcept {
+//  uint64_t cnt = 0;
+//
+//  while (!eof_ && Peek() == ' ') {
+//    Advance();
+//    ++cnt;
+//  }
+//
+//  return cnt;
+//}
 
-  while (!eof_ && !String::isAnyOf(Peek(), charset)) {
-    Advance();
-    ++cnt;
-  }
-
-  return cnt;
-}
-
-uint8_t Scanner::GetNextCharUntilAnyOf(const char *charset) noexcept {
-  if (cursor_ < string_->len_ && String::isAnyOf(Peek(), charset)) [[likely]] {
-    return string_->buf_[cursor_++];
-  }
-
-  eof_ = true;
-  return kEOF;
-}
-
-bool Scanner::CompareWordAtCursor(const char *to) const noexcept {
-  return string_->compare(to, Strlen(to), cursor_);
-}
-
-bool Scanner::CompareWordAtCursorIgnoreCase(const char *to) const noexcept {
-  return string_->compareIgnoreCase(to, Strlen(to), cursor_);
-}
+//
+// uint64_t Scanner::AdvanceAnyOf(const StringSlice charset) noexcept {
+//  uint64_t cnt = 0;
+//
+//  while (!eof_ && String::isAnyOf(Peek(), charset)) {
+//    Advance();
+//    ++cnt;
+//  }
+//
+//  return cnt;
+//}
+//
+// uint64_t Scanner::AdvanceUntilAnyOf(const char *charset) noexcept {
+//  uint64_t cnt = 0;
+//
+//  while (!eof_ && !String::isAnyOf(Peek(), charset)) {
+//    Advance();
+//    ++cnt;
+//  }
+//
+//  return cnt;
+//}
+//
+// uint8_t Scanner::GetNextCharUntilAnyOf(const char *charset) noexcept {
+//  if (cursor_ < string_->len_ && String::isAnyOf(Peek(), charset)) [[likely]] {
+//    return string_->data_buffer_[cursor_++];
+//  }
+//
+//  eof_ = true;
+//  return kEOF;
+//}
+//
+// bool Scanner::CompareWordAtCursor(const char *to) const noexcept {
+//  return string_->compare(to, Strlen(to), cursor_);
+//}
+//
+// bool Scanner::CompareWordAtCursorIgnoreCase(const char *to) const noexcept {
+//  return string_->compareIgnoreCase(to, Strlen(to), cursor_);
+//}
 
 }  // namespace cell

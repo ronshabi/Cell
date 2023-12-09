@@ -1,6 +1,9 @@
 # -----------------------------------------------------------------------------
 MESSAGE(STATUS "[CELL] Test Directory: " ${CMAKE_CURRENT_SOURCE_DIR})
 # -----------------------------------------------------------------------------
+
+set(Cell_Test_Sanitizers address,fuzzer,signed-integer-overflow,null,alignment,unsigned-integer-overflow)
+
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
@@ -15,5 +18,5 @@ gtest_discover_tests(StringTest)
 
 add_executable(StringFuzz StringFuzz.cpp)
 target_link_libraries(StringFuzz PRIVATE cell)
-target_compile_options(StringFuzz PUBLIC -g -fsanitize=address,fuzzer)
-target_link_options(StringFuzz PUBLIC -g -fsanitize=address,fuzzer)
+target_compile_options(StringFuzz PUBLIC -g -fsanitize=${Cell_Test_Sanitizers})
+target_link_options(StringFuzz PUBLIC -g -fsanitize=${Cell_Test_Sanitizers})

@@ -4,6 +4,7 @@ MESSAGE(STATUS "[CELL] Library Include Directory: " ${CMAKE_CURRENT_SOURCE_DIR}/
 # -----------------------------------------------------------------------------
 
 add_compile_definitions(DEBUG)
+add_compile_definitions(LOGGER_DEBUG)
 
 add_library(cell STATIC
         Assert.hpp
@@ -13,7 +14,28 @@ add_library(cell STATIC
         String.cpp
         String.hpp
         Scanner.cpp
-        Scanner.hpp)
+        Scanner.hpp
+        StringSlice.cpp
+        StringSlice.hpp
+        WeakStringMap.cpp
+        WeakStringMap.hpp
+
+        log/Log.hpp
+
+        http/HttpVersion.cpp
+        http/HttpVersion.hpp
+        http/HttpMethod.cpp
+        http/HttpMethod.hpp
+        http/HttpRequest.cpp
+        http/HttpRequest.hpp
+        http/HttpEncoding.hpp
+        http/HttpConnection.hpp
+        http/HttpMimeType.cpp
+        http/HttpMimeType.hpp
+        http/HttpUri.cpp
+        http/HttpUri.hpp
+        Router.cpp
+        Router.hpp)
 
 
 target_include_directories(cell PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)
@@ -22,7 +44,6 @@ target_include_directories(cell PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)
 # CompileOptions:
 # -----------------
 #   o Sanitizer: define env-var CELL_COMPILE_OPTIONS_SANITIZER
-#   o Fuzzer: define env-var CELL_COMPILE_OPTIONS_FUZZER
 #
 
 if (DEFINED ENV{CELL_COMPILE_OPTIONS_SANITIZER})
