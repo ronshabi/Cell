@@ -23,7 +23,7 @@ class Scanner {
   [[nodiscard]] bool IsEof() const noexcept { return eof_; }
   [[nodiscard]] uint8_t Peek() const noexcept;
   [[nodiscard]] uint8_t GetNextChar() noexcept;
-  void Advance() noexcept;
+  void Advance(uint64_t len = 1) noexcept;
   uint64_t AdvanceSpace() noexcept;
   uint64_t AdvanceAnyOf(const char* charset) noexcept;
   uint64_t AdvanceUntilAnyOf(const char* charset) noexcept;

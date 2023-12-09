@@ -14,6 +14,8 @@
 #include <utility>
 #include <vector>
 
+#include "cell/Assert.hpp"
+
 namespace cell {
 
 class String {
@@ -32,6 +34,11 @@ class String {
   [[nodiscard]] constexpr uint8_t *GetBufPtr() const noexcept { return buf_; }
   [[nodiscard]] constexpr uint64_t GetCap() const noexcept { return cap_; }
   [[nodiscard]] constexpr uint64_t GetLen() const noexcept { return len_; }
+  [[nodiscard]] constexpr uint8_t CharAt(uint64_t i) const noexcept {
+    CELL_ASSERT(i < len_);
+    return buf_[i];
+  }
+
 
   [[nodiscard]] bool Compare(const char *cstr) const noexcept;
   [[nodiscard]] bool Compare(std::string_view str) const noexcept;

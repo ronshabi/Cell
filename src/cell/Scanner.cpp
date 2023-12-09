@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "Scanner.hpp"
-
 #include "Memory.hpp"
 
 namespace cell {
@@ -43,10 +42,10 @@ Scanner &Scanner::operator=(Scanner &&other) noexcept {
   return *this;
 }
 
-
-void Scanner::Advance() noexcept {
-  if (cursor_ < string_->len_) [[likely]] {
-    cursor_++;
+// HTTP___
+void Scanner::Advance(const uint64_t len) noexcept {
+  if (cursor_ + len < string_->len_) [[likely]] {
+    cursor_ += len;
   } else {
     eof_ = true;
   }

@@ -57,6 +57,8 @@ String &String::operator=(String &&other) noexcept {
   len_ = other.len_;
   buf_ = other.buf_;
   other.buf_ = nullptr;
+
+  return *this;
 }
 
 // -----------------------------------------------------------------------------
@@ -225,16 +227,21 @@ void String::ReplaceAnyOf(const std::vector<const char *> &candidates,
 
   uint64_t i = 0;
   while (i < len_) {
+    bool replaced = false;
+
     for (uint64_t k = 0; k < candidates_amt; ++k) {
       if (compare(candidates[k], candidates_lengths[k], i)) {
         modified.AppendCString(replacement);
         i += candidates_lengths[k];
+        replaced = true;
         break;
       }
     }
 
-    modified.AppendChar(buf_[i]);
-    ++i;
+    if (!replaced) {
+      modified.AppendChar(buf_[i]);
+      ++i;
+    }
   }
 
   *this = std::move(modified);
@@ -331,13 +338,13 @@ void String::TrimRight(const uint8_t delimiter) noexcept {
     return;
   }
 
-  uint8_t *end = buf_ + len_;  // minus one to not be on null-terminating character
+  uint8_t *end = buf_ + len_ - 1;  // minus one to not be on null-terminating character
 
   while (end >= buf_ && *end == delimiter) {
     --end;
   }
 
-  MemZero(end + 1, static_cast<uint64_t>(buf_ + len_ - end) - 1);
+  MemZeroPtrRange(end + 1, buf_ + len_);
   len_ = static_cast<uint64_t>(end - buf_) + 1;
 }
 
@@ -369,7 +376,11 @@ void String::AppendChar(uint8_t c) noexcept {
 //                                    len_ still points at 0, like it should
 //
 void String::AppendCString(const char *cstr) noexcept {
-  const uint64_t l = strlen(cstr);
+  const uint64_t l = Strlen(cstr);
+
+  if (l == 0) [[unlikely]] {
+    return;
+  }
 
   if (len_ + l >= cap_) [[unlikely]] {
     Grow(RoundUp8(len_ + l + 1));
@@ -497,7 +508,7 @@ bool String::compare(const char *cstr, const uint64_t length,
     return true;
   }
 
-  return MemCompare(cstr, buf_, length);
+  return MemCompare(cstr, buf_ + offset, length);
 }
 
 bool String::compareIgnoreCase(const char *cstr, const uint64_t length,
