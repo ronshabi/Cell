@@ -479,6 +479,7 @@ void String::Grow(const uint64_t new_cap) {
   }
 
   buf_ = Realloc<uint8_t>(buf_, new_cap);
+//  MemZeroPtrRange(buf_ + len_, buf_ + new_cap);
   cap_ = new_cap;
 }
 

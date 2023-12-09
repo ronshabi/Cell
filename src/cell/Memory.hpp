@@ -84,7 +84,9 @@ inline void MemCopy(void* dest, const void* src, const uint64_t length) noexcept
   ::memcpy(dest, src, length);
 }
 
-[[nodiscard]] inline uint64_t Strlen(const char* str) noexcept { return strlen(str); }
+[[nodiscard]] inline uint64_t Strlen(const char* str) noexcept {
+  return strlen(str);
+}
 
 }  // namespace cell
 
