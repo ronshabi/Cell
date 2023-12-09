@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <gtest/gtest.h>
+#include <cstdio>
 #include "cell/Charset.hpp"
 #include "cell/Memory.hpp"
 #include "cell/String.hpp"
@@ -43,7 +44,7 @@ TEST(StringTest, Basic1) {
   ASSERT_EQ(myString.GetLen(), 16);
 
   myString.TrimRight();
-  std::printf("The string is: [%s]\n", myString.GetCString());
+//  std::printf("The string is: [%s]\n", myString.GetCString());
   ASSERT_TRUE(myString.Compare("gethttp69420"));
   ASSERT_EQ(myString.GetLen(), 12);
 
@@ -54,3 +55,32 @@ TEST(StringTest, Basic1) {
   ASSERT_EQ(myString.GetCap(), current_cap);
   ASSERT_TRUE(myString.ContainsJust(0));
 }
+
+TEST(StringTest, EmptyFile) {
+  String myString;
+  ASSERT_TRUE(myString.AppendFileContents("StringCorpus/Empty.input"));
+  ASSERT_EQ(myString.GetLen(), 0);
+  myString.ReplaceAnyOf({" ", "\n"}, "");
+  ASSERT_EQ(myString.GetLen(), 0);
+  ASSERT_EQ(myString.GetCap(), 8);
+}
+
+TEST(StringTest, AlotOfHebrew) {
+  String myString;
+  ASSERT_TRUE(myString.AppendFileContents("StringCorpus/AlotOfHebrew.input"));
+  ASSERT_EQ(myString.GetLen(), 12306);
+
+  myString.ReplaceAnyOf({" ", "\n"}, "");
+//  fprintf(stderr, "[%s]\n", myString.GetCString());
+  ASSERT_EQ(myString.GetLen(), 6102);
+}
+
+TEST(StringTest, NonAsciiChars) {
+  String myString;
+  ASSERT_TRUE(myString.AppendFileContents("StringCorpus/NonAsciiChars.input"));
+  ASSERT_EQ(myString.GetLen(), 146);
+  myString.Replace(" ", "");
+  ASSERT_EQ(myString.GetLen(), 125);
+}
+
+
