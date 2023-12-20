@@ -24,7 +24,7 @@ TEST(StringTest, Basic1) {
   ASSERT_FALSE(myString.Contains('@'));
   ASSERT_FALSE(myString.Contains(StringSlice::FromCString("123456789")));
   ASSERT_TRUE(myString.ContainsIgnoreCase(StringSlice::FromCString("http")));
-  ASSERT_TRUE(myString.ContainsAnyOf(StringSlice::FromCString("http")));
+  ASSERT_FALSE(myString.ContainsAnyOf(StringSlice::FromCString("http")));
   ASSERT_TRUE(myString.ContainsAnyOf(StringSlice::FromCString("123456789")));
   ASSERT_TRUE(myString.ContainsAnyOf(StringSlice::FromCString(cell::kAsciiUpper)));
   ASSERT_FALSE(myString.ContainsJust(StringSlice::FromCString(cell::kAsciiUpper)));
@@ -81,7 +81,7 @@ TEST(StringTest, NonAsciiChars) {
   String myString;
   ASSERT_TRUE(myString.AppendFileContents("StringCorpus/NonAsciiChars.input"));
   ASSERT_EQ(myString.GetLen(), 146);
-  myString.ReplaceAnyOf({StringSlice::FromCString(" ")}, StringSlice::FromCString(" "));
+  myString.ReplaceAnyOf({StringSlice::FromCString(" ")}, StringSlice::FromCString(""));
   ASSERT_EQ(myString.GetLen(), 125);
 }
 

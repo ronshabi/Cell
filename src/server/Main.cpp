@@ -3,23 +3,25 @@
 
 #include <cell/Scanner.hpp>
 #include <cell/String.hpp>
+#include <cell/StringSlice.hpp>
+#include <cell/http/HttpRequest.hpp>
 #include <iostream>
 
 using namespace cell;
 
 int main(int argc, char* argv[]) {
-  String request;
-  request.AppendCString("GET /index.php?query=all HTTP/1.1");
+  String buf;
+  http::HttpRequest request(&buf);
+  buf.AppendStringSlice(StringSlice::FromCString("GET /index.php?query=all HTTP/1.1\r\n"));
 
-  Scanner scanner(&request);
-
-  while (true) {
-    const auto c = scanner.GetNextChar();
-    if (scanner.IsEof()) {
-      break;
-    }
-
-    std::cout << "[" << c << "]";
+  const auto result = request.Parse();
+  if (result == cell::http::HttpRequestParsingStatus::Ok) {
+    printf("Method: %s, Version: %s, Target: [%s]\n",
+           HttpMethodToString(request.GetMethod()).GetConstCharPtr(),
+           HttpVersionToString(request.GetVersion()).GetConstCharPtr(),
+           request.GetTarget().GetConstCharPtr());
+  } else {
+    printf("Result not ok\n");
   }
 
   return 0;
