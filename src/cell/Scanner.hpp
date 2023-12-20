@@ -27,7 +27,7 @@ class Scanner {
 
   void ResetState() noexcept;
   void AppendToBufferUntilHittingChar(String& outbuffer, uint8_t ch) noexcept;
-  bool AdvanceContinuousExactly(uint64_t amount, const uint8_t ch) noexcept;
+  bool AdvanceContinuousExactly(uint8_t ch, uint64_t amount = 1) noexcept;
   //  uint64_t AdvanceAnyOf(StringSlice charset) noexcept;
   //  uint64_t AdvanceUntilAnyOf(const char* charset) noexcept;
   //  [[nodiscard]] uint8_t GetNextCharUntilAnyOf(const char* charset) noexcept;

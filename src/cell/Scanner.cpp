@@ -70,7 +70,7 @@ void Scanner::AppendToBufferUntilHittingChar(String &outbuffer, uint8_t ch) noex
   }
 }
 
-bool Scanner::AdvanceContinuousExactly(uint64_t amount, const uint8_t ch) noexcept {
+bool Scanner::AdvanceContinuousExactly(const uint8_t ch, uint64_t amount) noexcept {
   CELL_ASSERT(amount != 0);
 
   while (true) {
@@ -78,6 +78,7 @@ bool Scanner::AdvanceContinuousExactly(uint64_t amount, const uint8_t ch) noexce
     CELL_LOG_DEBUG("Cursor at (%lu/%lu) [0x%X]. Target: 0x%X Amount left: %lu, EOF: %d", cursor_,
                    string_->len_, ch, current, amount, eof_);
     if (!eof_ && current == ch) {
+      CELL_LOG_DEBUG("Found [0x%X]", current);
       --amount;
     }
 
