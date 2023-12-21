@@ -12,7 +12,7 @@
 #include "cell/Scanner.hpp"
 #include "cell/String.hpp"
 #include "cell/StringSlice.hpp"
-#include "cell/WeakStringMap.hpp"
+#include "cell/WeakStringCache.hpp"
 
 namespace cell::http {
 
@@ -22,9 +22,11 @@ enum class HttpRequestParserResult {
   ErrorMethodInvalid,
   ErrorVersionInvalid,
   ErrorNoCrlfAfterRequestLine,
+  ErrorNoCrlfAfterHeaderValue,
+  ErrorNoEndingCrlfBetweenHeadersAndBody,
   ErrorUriTooLong,
-  ErrorNoFieldLines,
   ErrorFieldLineStartsWithWhitespace,
+  ErrorHeadRequestBodyExists,
 };
 
 enum class HttpRequestParserState {
@@ -36,6 +38,7 @@ enum class HttpRequestParserState {
   EatingWhitespaceAfterHeaderKey,
   NeedHeaderValue,
   NeedCrlfAfterHeaderValue,
+  NeedCrlfBetweenHeadersAndBody,
   AppendingBody,
 };
 
@@ -78,7 +81,7 @@ class HttpRequest {
   String host_{kDefaultHeaderValueCapacity};
   String referrer_{kDefaultHeaderValueCapacity};
   String user_agent_{kDefaultHeaderValueCapacity};
-  WeakStringMap headers_{};
+  WeakStringCache headers_{};
 };
 
 }  // namespace cell::http

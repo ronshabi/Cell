@@ -5,6 +5,7 @@
 
 #include <cell/http/HttpRequest.hpp>
 #include "cell/String.hpp"
+#include "cell/http/HttpConnection.hpp"
 #include "cell/http/HttpMethod.hpp"
 
 using namespace cell;
@@ -27,7 +28,8 @@ TEST(HttpRequestTest, Head2) {
   cell::String buf;
   HttpRequest request(&buf);
   buf.AppendStringSlice(StringSlice::FromCString("HEAD / HTTP/3\r\n"
-                                                 "Connection: keep-alive\r\n"));
+                                                 "Connection: keep-alive\r\n"
+                                                 "\r\n"));
 
   const auto result = request.Parse();
 
@@ -35,4 +37,31 @@ TEST(HttpRequestTest, Head2) {
   ASSERT_STREQ(cell::http::HttpMethodToString(request.GetMethod()).GetConstCharPtr(), "HEAD");
   ASSERT_STREQ(cell::http::HttpVersionToString(request.GetVersion()).GetConstCharPtr(), "HTTP/3");
   ASSERT_STREQ(request.GetTarget().GetConstCharPtr(), "/");
+  ASSERT_EQ(request.GetConnectionType(), http::HttpConnection::KeepAlive);
+}
+
+TEST(HttpRequestTest, Head3) {
+  cell::String buf;
+  HttpRequest request(&buf);
+  buf.AppendStringSlice(StringSlice::FromCString("HEAD /script.js?query=true HTTP/2\r\n"
+      "Connection: keep-alive\r\n"
+      "User-Agent: Mozilla/5.0 (Linux; Android 13;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/107.0.5304.141\r\n"
+      "Upgrade-Insecure-Requests:1\r\n"
+      "Host: www.example.com\r\n"
+      "Referrer: www.google.com\r\n"
+      "Sec-Fetch-Dest: script\r\n"
+      "\r\n"));
+
+  const auto result = request.Parse();
+
+  ASSERT_EQ(result, http::HttpRequestParserResult::Ok);
+  ASSERT_STREQ(cell::http::HttpMethodToString(request.GetMethod()).GetConstCharPtr(), "HEAD");
+  ASSERT_STREQ(cell::http::HttpVersionToString(request.GetVersion()).GetConstCharPtr(), "HTTP/2");
+  ASSERT_STREQ(request.GetTarget().GetConstCharPtr(), "/script.js?query=true");
+
+  ASSERT_EQ(request.GetConnectionType(), http::HttpConnection::KeepAlive);
+  ASSERT_STREQ(request.GetUserAgent().GetConstCharPtr(), "Mozilla/5.0 (Linux; Android 13;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/107.0.5304.141");
+  ASSERT_STREQ(request.GetHost().GetConstCharPtr(), "www.example.com");
+  ASSERT_STREQ(request.GetReferrer().GetConstCharPtr(), "www.google.com");
+  ASSERT_EQ(request.CanUpgradeInsecureConnections(), true);
 }

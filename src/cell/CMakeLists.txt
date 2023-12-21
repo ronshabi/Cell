@@ -17,8 +17,8 @@ add_library(cell STATIC
         Scanner.hpp
         StringSlice.cpp
         StringSlice.hpp
-        WeakStringMap.cpp
-        WeakStringMap.hpp
+        WeakStringCache.cpp
+        WeakStringCache.hpp
 
         log/Log.hpp
 

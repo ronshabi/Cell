@@ -11,7 +11,7 @@
 
 #include "Charset.hpp"
 #include "StringSlice.hpp"
-#include "WeakStringMap.hpp"
+#include "WeakStringCache.hpp"
 #include "cell/Assert.hpp"
 #include "cell/Base.hpp"
 #include "cell/Memory.hpp"

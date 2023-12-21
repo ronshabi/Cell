@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef CELL_WEAKSTRINGMAP_HPP
-#define CELL_WEAKSTRINGMAP_HPP
+#ifndef CELL_WEAKSTRINGCACHE_HPP
+#define CELL_WEAKSTRINGCACHE_HPP
 
 #include <cstdint>
 #include <vector>
@@ -12,13 +12,13 @@
 
 namespace cell {
 
-class WeakStringMap {
+class WeakStringCache {
  public:
   static constexpr uint64_t kKeyDoesNotExist = static_cast<uint64_t>(-1);
 
-  explicit WeakStringMap() noexcept = default;
+  explicit WeakStringCache() noexcept = default;
 
-  uint64_t AddKeyValuePair(StringSlice k, StringSlice v) noexcept;
+  uint64_t AddKeyValuePair(const String& k, const String& v) noexcept;
   uint64_t AppendToValue(StringSlice k, StringSlice v) noexcept;
   [[nodiscard]] uint64_t SearchKey(StringSlice k) const noexcept;
   [[nodiscard]] uint64_t SearchKeyIgnoreCase(StringSlice k) const noexcept;
@@ -30,4 +30,4 @@ class WeakStringMap {
 
 }  // namespace cell
 
-#endif  // CELL_WEAKSTRINGMAP_HPP
+#endif  // CELL_WEAKSTRINGCACHE_HPP

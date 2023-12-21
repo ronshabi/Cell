@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include "cell/String.hpp"
-#include "cell/WeakStringMap.hpp"
+#include "cell/WeakStringCache.hpp"
 
 namespace cell::http {
 
@@ -29,7 +29,7 @@ class HttpUri {
   static constexpr uint64_t kDefaultUriBufferCapacity = 4096;
 
   String path_{kDefaultUriBufferCapacity};
-  WeakStringMap queries_;
+  WeakStringCache queries_;
 };
 
 }  // namespace cell::http
