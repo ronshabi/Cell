@@ -8,8 +8,8 @@
 #include <functional>
 #include <unordered_map>
 
-#include "cell/String.hpp"
-#include "cell/WeakStringCache.hpp"
+#include "cell/core/String.hpp"
+#include "cell/core/WeakStringCache.hpp"
 
 namespace cell::http {
 

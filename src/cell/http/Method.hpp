@@ -4,7 +4,7 @@
 #ifndef CELL_METHOD_HPP
 #define CELL_METHOD_HPP
 
-#include "cell/StringSlice.hpp"
+#include "cell/core/StringSlice.hpp"
 
 namespace cell::http {
 

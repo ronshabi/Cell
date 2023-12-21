@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-#include "cell/StringSlice.hpp"
+#include "cell/core/StringSlice.hpp"
 
 namespace cell::http {
 

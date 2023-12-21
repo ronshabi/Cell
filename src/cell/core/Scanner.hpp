@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-#include "cell/String.hpp"
+#include "String.hpp"
 
 namespace cell {
 

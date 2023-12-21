@@ -6,15 +6,25 @@
 
 #include <cstdint>
 
+#include "cell/core/StringSlice.hpp"
+
 namespace cell::http {
 
-enum Encoding : uint64_t {
-  None = 0b1,
-  Deflate = 0b10,
-  Gzip = 0b100,
-  Brotli = 0b1000,
-  ZStd = 0b10000
-};
+
+
+namespace encoding {
+using EncodingSet = uint64_t;
+
+constexpr EncodingSet kErrorParsing = static_cast<EncodingSet>(-1);
+constexpr EncodingSet kNone = 0;
+constexpr EncodingSet kDeflate = 0b1;
+constexpr EncodingSet kGzip = 0b10;
+constexpr EncodingSet kBrotli = 0b100;
+constexpr EncodingSet kZstd = 0b100;
+
+[[nodiscard]] EncodingSet ParseFromString(StringSlice slice) noexcept;
+
+}
 
 }
 

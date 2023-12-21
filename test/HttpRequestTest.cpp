@@ -5,7 +5,7 @@
 
 #include <cell/http/Request.hpp>
 
-#include "cell/String.hpp"
+#include "cell/core/String.hpp"
 #include "cell/http/Connection.hpp"
 #include "cell/http/Method.hpp"
 
@@ -51,6 +51,7 @@ TEST(HttpRequestTest, Head3) {
       "Host: www.example.com\r\n"
       "Referrer: www.google.com\r\n"
       "Sec-Fetch-Dest: script\r\n"
+      "Accept-Encoding: gzip, deflate, br"
       "\r\n"));
 
   const auto result = request.Parse();
@@ -66,3 +67,4 @@ TEST(HttpRequestTest, Head3) {
   ASSERT_STREQ(request.GetReferrer().GetConstCharPtr(), "www.google.com");
   ASSERT_EQ(request.CanUpgradeInsecureConnections(), true);
 }
+

@@ -9,10 +9,10 @@
 #include "Method.hpp"
 #include "Uri.hpp"
 #include "Version.hpp"
-#include "cell/Scanner.hpp"
-#include "cell/String.hpp"
-#include "cell/StringSlice.hpp"
-#include "cell/WeakStringCache.hpp"
+#include "cell/core/Scanner.hpp"
+#include "cell/core/String.hpp"
+#include "cell/core/StringSlice.hpp"
+#include "cell/core/WeakStringCache.hpp"
 
 namespace cell::http {
 
@@ -55,7 +55,7 @@ class Request {
   [[nodiscard]] StringSlice GetUserAgent() const noexcept { return user_agent_.SubSlice(); }
   [[nodiscard]] StringSlice GetHost() const noexcept { return host_.SubSlice(); }
   [[nodiscard]] StringSlice GetReferrer() const noexcept { return referrer_.SubSlice(); }
-  [[nodiscard]] Encoding GetAcceptEncoding() const noexcept { return accept_encoding_; }
+  [[nodiscard]] encoding::EncodingSet GetAcceptEncoding() const noexcept { return accept_encoding_; }
   [[nodiscard]] Connection GetConnectionType() const noexcept { return connection_; }
   [[nodiscard]] bool CanUpgradeInsecureConnections() const noexcept {
     return upgrade_insecure_requests_;
@@ -74,7 +74,7 @@ class Request {
   Version version_{Version::UnsupportedVersion};
   Method method_{Method::UnsupportedMethod};
   Uri uri_{};
-  Encoding accept_encoding_{None};
+  encoding::EncodingSet accept_encoding_{encoding::kNone};
   Connection connection_{Connection::Close};
   bool upgrade_insecure_requests_{false};
   String host_{kDefaultHeaderValueCapacity};

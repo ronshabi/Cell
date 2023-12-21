@@ -3,13 +3,14 @@
 
 #include "Request.hpp"
 
+#include "Encoding.hpp"
 #include "Method.hpp"
 #include "Uri.hpp"
 #include "Version.hpp"
-#include "cell/Charset.hpp"
-#include "cell/Scanner.hpp"
-#include "cell/String.hpp"
-#include "cell/StringSlice.hpp"
+#include "cell/core/Charset.hpp"
+#include "cell/core/Scanner.hpp"
+#include "cell/core/String.hpp"
+#include "cell/core/StringSlice.hpp"
 #include "cell/log/Log.hpp"
 
 namespace cell::http {
@@ -23,7 +24,7 @@ RequestParserResult Request::Parse() noexcept {
   buf1.Clear();
   buf2.Clear();
 
-//  CELL_LOG_DEBUG("Parsing request [%s]", data_->SubSlice(0, 1));
+  //  CELL_LOG_DEBUG("Parsing request [%s]", data_->SubSlice(0, 1));
 
   while (cursor != data_->GetLen()) {
     ch = data_->CharAt(cursor);
@@ -40,7 +41,7 @@ RequestParserResult Request::Parse() noexcept {
 
           parser_state_ = RequestParserState::NeedTarget;
           buf1.Clear();
-          break ;
+          break;
         }
 
         buf1.AppendByte(ch);
@@ -54,7 +55,7 @@ RequestParserResult Request::Parse() noexcept {
           uri_.SetBufferContents(buf1);
           parser_state_ = RequestParserState::NeedVersion;
           buf1.Clear();
-          break ;
+          break;
         }
 
         buf1.AppendByte(ch);
@@ -72,7 +73,7 @@ RequestParserResult Request::Parse() noexcept {
 
           parser_state_ = RequestParserState::NeedCrlfAfterRequestLine;
           buf1.Clear();
-          break ;
+          break;
         }
 
         buf1.AppendByte(ch);
@@ -118,7 +119,7 @@ RequestParserResult Request::Parse() noexcept {
           --cursor;
           break;
         }
-        break ;
+        break;
       }
 
       case RequestParserState::NeedHeaderValue: {
@@ -148,6 +149,14 @@ RequestParserResult Request::Parse() noexcept {
             if (buf2.Compare(StringSlice::FromCString("1"))) {
               CELL_LOG_DEBUG_SIMPLE("[~] Setting upgrade-insecure-requests to true");
               upgrade_insecure_requests_ = true;
+            }
+          } else if (buf1.Compare(StringSlice::FromCString("accept-encoding"))) {
+            CELL_LOG_DEBUG("[~] Passing accept-encoding string of '%s' to designated parser", buf1.GetCString());
+            accept_encoding_ = encoding::ParseFromString(buf2.SubSlice());
+
+            if (accept_encoding_ == encoding::kErrorParsing) {
+              CELL_LOG_DEBUG_SIMPLE("[!!!] Failed parsing accept-encoding, defaults to None");
+              accept_encoding_ = 0;
             }
           } else {
             CELL_LOG_DEBUG("[~] Found uncommon header '%s' -> '%s', adding to table", buf1.GetCString(), buf2.GetCString());

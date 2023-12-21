@@ -3,7 +3,7 @@
 
 #include "Version.hpp"
 
-#include "cell/Assert.hpp"
+#include "cell/core/Assert.hpp"
 
 namespace cell::http {
 

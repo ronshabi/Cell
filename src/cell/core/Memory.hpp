@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "cell/Assert.hpp"
+#include "Assert.hpp"
 
 namespace cell {
 

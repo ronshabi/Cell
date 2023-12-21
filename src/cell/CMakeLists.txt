@@ -7,18 +7,18 @@ add_compile_definitions(DEBUG)
 add_compile_definitions(LOGGER_DEBUG)
 
 add_library(cell STATIC
-        Assert.hpp
-        Base.hpp
-        Memory.hpp
-        Charset.hpp
-        String.cpp
-        String.hpp
-        Scanner.cpp
-        Scanner.hpp
-        StringSlice.cpp
-        StringSlice.hpp
-        WeakStringCache.cpp
-        WeakStringCache.hpp
+        core/Assert.hpp
+        core/Base.hpp
+        core/Memory.hpp
+        core/Charset.hpp
+        core/String.cpp
+        core/String.hpp
+        core/Scanner.cpp
+        core/Scanner.hpp
+        core/StringSlice.cpp
+        core/StringSlice.hpp
+        core/WeakStringCache.cpp
+        core/WeakStringCache.hpp
 
         log/Log.hpp
 
@@ -34,8 +34,8 @@ add_library(cell STATIC
         http/MimeType.hpp
         http/Uri.cpp
         http/Uri.hpp
-        Router.cpp
-        Router.hpp)
+        core/Router.cpp
+        core/Router.hpp http/Encoding.cpp)
 
 
 target_include_directories(cell PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)

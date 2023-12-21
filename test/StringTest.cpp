@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <gtest/gtest.h>
+
 #include <cstdio>
-#include "cell/Charset.hpp"
-#include "cell/Memory.hpp"
-#include "cell/String.hpp"
-#include "cell/StringSlice.hpp"
+
+#include "cell/core/Charset.hpp"
+#include "cell/core/Memory.hpp"
+#include "cell/core/String.hpp"
+#include "cell/core/StringSlice.hpp"
 
 using cell::String;
 using cell::StringSlice;

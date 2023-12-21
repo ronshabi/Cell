@@ -14,8 +14,8 @@
 #include <utility>
 #include <vector>
 
-#include "cell/Assert.hpp"
-#include "cell/StringSlice.hpp"
+#include "Assert.hpp"
+#include "StringSlice.hpp"
 
 namespace cell {
 

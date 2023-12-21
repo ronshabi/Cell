@@ -6,9 +6,9 @@
 #include <cstdint>
 
 #include "Charset.hpp"
+#include "Memory.hpp"
 #include "String.hpp"
-#include "cell/Memory.hpp"
-#include "log/Log.hpp"
+#include "cell/log/Log.hpp"
 
 namespace cell {
 

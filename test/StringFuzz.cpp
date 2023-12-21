@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include <cell/String.hpp>
+#include "cell/core/String.hpp"
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   uint8_t buf[Size + 1];

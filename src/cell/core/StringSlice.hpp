@@ -6,6 +6,8 @@
 
 #include <cstdint>
 
+#include "Assert.hpp"
+
 namespace cell {
 
 class StringSlice {
@@ -24,6 +26,11 @@ class StringSlice {
   [[nodiscard]] const char* GetConstCharPtr() const { return reinterpret_cast<const char*>(data_); }
   [[nodiscard]] const uint8_t* GetU8Ptr() const { return data_; }
   [[nodiscard]] uint64_t GetLen() const { return len_; }
+  [[nodiscard]] uint8_t ByteAt(uint64_t i) const {
+    CELL_ASSERT(i < len_);
+
+    return data_[i];
+  }
 
   [[nodiscard]] bool Compare(StringSlice to) const noexcept;
   [[nodiscard]] bool CompareIgnoreCase(StringSlice to) const noexcept;

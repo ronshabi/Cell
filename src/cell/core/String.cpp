@@ -9,12 +9,12 @@
 
 #include <cstdint>
 
+#include "Assert.hpp"
+#include "Base.hpp"
 #include "Charset.hpp"
+#include "Memory.hpp"
 #include "StringSlice.hpp"
 #include "WeakStringCache.hpp"
-#include "cell/Assert.hpp"
-#include "cell/Base.hpp"
-#include "cell/Memory.hpp"
 
 namespace cell {
 

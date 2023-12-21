@@ -6,7 +6,7 @@
 #include "Charset.hpp"
 #include "Memory.hpp"
 #include "StringSlice.hpp"
-#include "log/Log.hpp"
+#include "cell/log/Log.hpp"
 
 namespace cell {
 
