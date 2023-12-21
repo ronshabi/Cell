@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef CELL_HTTPENCODING_HPP
-#define CELL_HTTPENCODING_HPP
+#ifndef CELL_ENCODING_HPP
+#define CELL_ENCODING_HPP
 
 #include <cstdint>
 
 namespace cell::http {
 
-enum HttpEncoding : uint64_t {
+enum Encoding : uint64_t {
   None = 0b1,
   Deflate = 0b10,
   Gzip = 0b100,
@@ -18,4 +18,4 @@ enum HttpEncoding : uint64_t {
 
 }
 
-#endif  // CELL_HTTPENCODING_HPP
+#endif  // CELL_ENCODING_HPP

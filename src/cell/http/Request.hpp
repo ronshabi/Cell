@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef CELL_HTTPREQUEST_HPP
-#define CELL_HTTPREQUEST_HPP
+#ifndef CELL_REQUEST_HPP
+#define CELL_REQUEST_HPP
 
-#include "HttpConnection.hpp"
-#include "HttpEncoding.hpp"
-#include "HttpMethod.hpp"
-#include "HttpUri.hpp"
-#include "HttpVersion.hpp"
+#include "Connection.hpp"
+#include "Encoding.hpp"
+#include "Method.hpp"
+#include "Uri.hpp"
+#include "Version.hpp"
 #include "cell/Scanner.hpp"
 #include "cell/String.hpp"
 #include "cell/StringSlice.hpp"
@@ -16,7 +16,7 @@
 
 namespace cell::http {
 
-enum class HttpRequestParserResult {
+enum class RequestParserResult {
   Ok,
   ErrorInvalidRequest,
   ErrorMethodInvalid,
@@ -29,7 +29,7 @@ enum class HttpRequestParserResult {
   ErrorHeadRequestBodyExists,
 };
 
-enum class HttpRequestParserState {
+enum class RequestParserState {
   NeedMethod,
   NeedTarget,
   NeedVersion,
@@ -43,20 +43,20 @@ enum class HttpRequestParserState {
 };
 
 
-class HttpRequest {
+class Request {
  public:
-  explicit HttpRequest(String* databuffer) noexcept;
+  explicit Request(String* databuffer) noexcept;
 
-  [[nodiscard]] HttpRequestParserResult Parse() noexcept;
+  [[nodiscard]] RequestParserResult Parse() noexcept;
 
-  [[nodiscard]] HttpVersion GetVersion() const noexcept { return version_; }
-  [[nodiscard]] HttpMethod GetMethod() const noexcept { return method_; }
+  [[nodiscard]] Version GetVersion() const noexcept { return version_; }
+  [[nodiscard]] Method GetMethod() const noexcept { return method_; }
   [[nodiscard]] StringSlice GetTarget() const noexcept { return uri_.GetPath(); }
   [[nodiscard]] StringSlice GetUserAgent() const noexcept { return user_agent_.SubSlice(); }
   [[nodiscard]] StringSlice GetHost() const noexcept { return host_.SubSlice(); }
   [[nodiscard]] StringSlice GetReferrer() const noexcept { return referrer_.SubSlice(); }
-  [[nodiscard]] HttpEncoding GetAcceptEncoding() const noexcept { return accept_encoding_; }
-  [[nodiscard]] HttpConnection GetConnectionType() const noexcept { return connection_; }
+  [[nodiscard]] Encoding GetAcceptEncoding() const noexcept { return accept_encoding_; }
+  [[nodiscard]] Connection GetConnectionType() const noexcept { return connection_; }
   [[nodiscard]] bool CanUpgradeInsecureConnections() const noexcept {
     return upgrade_insecure_requests_;
   }
@@ -69,14 +69,13 @@ class HttpRequest {
   String buf1{kDefaultBufferCapacity};
   String buf2{kDefaultBufferCapacity};
 
-  HttpRequestParserState parser_state_{HttpRequestParserState::NeedMethod};
+  RequestParserState parser_state_{RequestParserState::NeedMethod};
 
-
-  HttpVersion version_{HttpVersion::UnsupportedVersion};
-  HttpMethod method_{HttpMethod::UnsupportedMethod};
-  HttpUri uri_{};
-  HttpEncoding accept_encoding_{None};
-  HttpConnection connection_{HttpConnection::Close};
+  Version version_{Version::UnsupportedVersion};
+  Method method_{Method::UnsupportedMethod};
+  Uri uri_{};
+  Encoding accept_encoding_{None};
+  Connection connection_{Connection::Close};
   bool upgrade_insecure_requests_{false};
   String host_{kDefaultHeaderValueCapacity};
   String referrer_{kDefaultHeaderValueCapacity};
@@ -86,4 +85,4 @@ class HttpRequest {
 
 }  // namespace cell::http
 
-#endif  // CELL_HTTPREQUEST_HPP
+#endif  // CELL_REQUEST_HPP

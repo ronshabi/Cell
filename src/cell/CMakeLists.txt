@@ -22,18 +22,18 @@ add_library(cell STATIC
 
         log/Log.hpp
 
-        http/HttpVersion.cpp
-        http/HttpVersion.hpp
-        http/HttpMethod.cpp
-        http/HttpMethod.hpp
-        http/HttpRequest.cpp
-        http/HttpRequest.hpp
-        http/HttpEncoding.hpp
-        http/HttpConnection.hpp
-        http/HttpMimeType.cpp
-        http/HttpMimeType.hpp
-        http/HttpUri.cpp
-        http/HttpUri.hpp
+        http/Version.cpp
+        http/Version.hpp
+        http/Method.cpp
+        http/Method.hpp
+        http/Request.cpp
+        http/Request.hpp
+        http/Encoding.hpp
+        http/Connection.hpp
+        http/MimeType.cpp
+        http/MimeType.hpp
+        http/Uri.cpp
+        http/Uri.hpp
         Router.cpp
         Router.hpp)
 

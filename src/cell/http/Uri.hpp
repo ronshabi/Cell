@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef CELL_HTTPURI_HPP
-#define CELL_HTTPURI_HPP
+#ifndef CELL_URI_HPP
+#define CELL_URI_HPP
 
 #include <cstdint>
 #include <functional>
@@ -13,9 +13,9 @@
 
 namespace cell::http {
 
-class HttpUri {
+class Uri {
  public:
-  explicit HttpUri() noexcept = default;
+  explicit Uri() noexcept = default;
 
   void SetBufferContents(const String& other) noexcept {
     path_ = other;
@@ -34,4 +34,4 @@ class HttpUri {
 
 }  // namespace cell::http
 
-#endif  // CELL_HTTPURI_HPP
+#endif  // CELL_URI_HPP

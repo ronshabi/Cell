@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#include "HttpRequest.hpp"
+#include "Request.hpp"
 
-#include "HttpMethod.hpp"
-#include "HttpUri.hpp"
-#include "HttpVersion.hpp"
+#include "Method.hpp"
+#include "Uri.hpp"
+#include "Version.hpp"
 #include "cell/Charset.hpp"
 #include "cell/Scanner.hpp"
 #include "cell/String.hpp"
@@ -14,9 +14,9 @@
 
 namespace cell::http {
 
-HttpRequest::HttpRequest(String *databuffer) noexcept : data_(databuffer) {}
+Request::Request(String *databuffer) noexcept : data_(databuffer) {}
 
-HttpRequestParserResult HttpRequest::Parse() noexcept {
+RequestParserResult Request::Parse() noexcept {
   uint64_t cursor = 0;
   uint8_t ch;
   data_->RefreshLength();
@@ -29,16 +29,16 @@ HttpRequestParserResult HttpRequest::Parse() noexcept {
     ch = data_->CharAt(cursor);
 
     switch (parser_state_) {
-      case HttpRequestParserState::NeedMethod: {
+      case RequestParserState::NeedMethod: {
         if (IsWhitespace(ch)) {
           CELL_LOG_DEBUG("Method Buffer = '%s'", buf1.GetCString());
           method_ = HttpMethodFromString(buf1.SubSlice());
 
-          if (method_ == HttpMethod::UnsupportedMethod) {
-            return HttpRequestParserResult::ErrorMethodInvalid;
+          if (method_ == Method::UnsupportedMethod) {
+            return RequestParserResult::ErrorMethodInvalid;
           }
 
-          parser_state_ = HttpRequestParserState::NeedTarget;
+          parser_state_ = RequestParserState::NeedTarget;
           buf1.Clear();
           break ;
         }
@@ -47,12 +47,12 @@ HttpRequestParserResult HttpRequest::Parse() noexcept {
         break;
       }
 
-      case HttpRequestParserState::NeedTarget: {
+      case RequestParserState::NeedTarget: {
         if (IsWhitespace(ch)) {
           CELL_LOG_DEBUG("URI (Target) Buffer = '%s'", buf1.GetCString());
 
           uri_.SetBufferContents(buf1);
-          parser_state_ = HttpRequestParserState::NeedVersion;
+          parser_state_ = RequestParserState::NeedVersion;
           buf1.Clear();
           break ;
         }
@@ -61,16 +61,16 @@ HttpRequestParserResult HttpRequest::Parse() noexcept {
         break;
       }
 
-      case HttpRequestParserState::NeedVersion: {
+      case RequestParserState::NeedVersion: {
         if (ch == kCR) {
           CELL_LOG_DEBUG("Version Buffer = '%s'", buf1.GetCString());
           version_ = HttpVersionFromString(buf1.SubSlice());
 
-          if (version_ == HttpVersion::UnsupportedVersion) {
-            return HttpRequestParserResult::ErrorVersionInvalid;
+          if (version_ == Version::UnsupportedVersion) {
+            return RequestParserResult::ErrorVersionInvalid;
           }
 
-          parser_state_ = HttpRequestParserState::NeedCrlfAfterRequestLine;
+          parser_state_ = RequestParserState::NeedCrlfAfterRequestLine;
           buf1.Clear();
           break ;
         }
@@ -79,19 +79,19 @@ HttpRequestParserResult HttpRequest::Parse() noexcept {
         break;
       }
 
-      case HttpRequestParserState::NeedCrlfAfterRequestLine: {
+      case RequestParserState::NeedCrlfAfterRequestLine: {
         if (data_->CharAt(cursor) != kLF) {
-          return HttpRequestParserResult::ErrorNoCrlfAfterRequestLine;
+          return RequestParserResult::ErrorNoCrlfAfterRequestLine;
         }
 
-        parser_state_ = HttpRequestParserState::NeedHeaderKey;
+        parser_state_ = RequestParserState::NeedHeaderKey;
         break;
       }
 
-      case HttpRequestParserState::NeedHeaderKey: {
+      case RequestParserState::NeedHeaderKey: {
         if (ch == kCR) {
           CELL_LOG_DEBUG_SIMPLE("No more headers, check last CRLF");
-          parser_state_ = HttpRequestParserState::NeedCrlfBetweenHeadersAndBody;
+          parser_state_ = RequestParserState::NeedCrlfBetweenHeadersAndBody;
           buf1.Clear();
           break;
         }
@@ -99,29 +99,29 @@ HttpRequestParserResult HttpRequest::Parse() noexcept {
         if (ch == ':') {
           buf1.ToLower();
           CELL_LOG_DEBUG("Found header key: '%s'", buf1.GetCString());
-          parser_state_ = HttpRequestParserState::EatingWhitespaceAfterHeaderKey;
+          parser_state_ = RequestParserState::EatingWhitespaceAfterHeaderKey;
           break;
         }
 
         // not CR, because we dealt with it in the first if
         if (IsWhitespace(ch)) {
-          return HttpRequestParserResult::ErrorFieldLineStartsWithWhitespace;
+          return RequestParserResult::ErrorFieldLineStartsWithWhitespace;
         }
 
         buf1.AppendByte(ch);
         break;
       }
 
-      case HttpRequestParserState::EatingWhitespaceAfterHeaderKey: {
+      case RequestParserState::EatingWhitespaceAfterHeaderKey: {
         if (!IsWhitespace(ch)) {
-          parser_state_ = HttpRequestParserState::NeedHeaderValue;
+          parser_state_ = RequestParserState::NeedHeaderValue;
           --cursor;
           break;
         }
         break ;
       }
 
-      case HttpRequestParserState::NeedHeaderValue: {
+      case RequestParserState::NeedHeaderValue: {
         if (ch == kCR) {
           CELL_LOG_DEBUG("Header value: [%s]", buf2.GetCString());
 
@@ -130,10 +130,10 @@ HttpRequestParserResult HttpRequest::Parse() noexcept {
           if (buf1.Compare(StringSlice::FromCString("connection"))) {
             if (buf2.Compare(StringSlice::FromCString("keep-alive"))) {
               CELL_LOG_DEBUG_SIMPLE("[~] Connection: keep-alive");
-              connection_ = HttpConnection::KeepAlive;
+              connection_ = Connection::KeepAlive;
             } else {
               CELL_LOG_DEBUG("[~] Connection defaults to close (actual value of header: %s)", buf2.GetCString());
-              connection_ = HttpConnection::Close;
+              connection_ = Connection::Close;
             }
           } else if (buf1.Compare(StringSlice::FromCString("host"))) {
             CELL_LOG_DEBUG("[~] Setting request host to '%s'", buf2.GetCString());
@@ -156,7 +156,7 @@ HttpRequestParserResult HttpRequest::Parse() noexcept {
 
           buf1.Clear();
           buf2.Clear();
-          parser_state_ = HttpRequestParserState::NeedCrlfAfterHeaderValue;
+          parser_state_ = RequestParserState::NeedCrlfAfterHeaderValue;
           break;
         }
 
@@ -165,30 +165,30 @@ HttpRequestParserResult HttpRequest::Parse() noexcept {
         break;
       }
 
-      case HttpRequestParserState::NeedCrlfAfterHeaderValue: {
-//        CELL_LOG_DEBUG("HttpRequestParserState::NeedCrlfAfterHeaderValue: Cursor at %02X", ch);
+      case RequestParserState::NeedCrlfAfterHeaderValue: {
+//        CELL_LOG_DEBUG("RequestParserState::NeedCrlfAfterHeaderValue: Cursor at %02X", ch);
 
         if (data_->CharAt(cursor) == kLF) {
-          parser_state_ = HttpRequestParserState::NeedHeaderKey;
+          parser_state_ = RequestParserState::NeedHeaderKey;
           break ;
         }
 
-        return HttpRequestParserResult::ErrorNoCrlfAfterHeaderValue;
+        return RequestParserResult::ErrorNoCrlfAfterHeaderValue;
       }
 
-      case HttpRequestParserState::NeedCrlfBetweenHeadersAndBody: {
+      case RequestParserState::NeedCrlfBetweenHeadersAndBody: {
         // end of headers?
         if (data_->CharAt(cursor) == kLF) {
-          parser_state_ = HttpRequestParserState::AppendingBody;
+          parser_state_ = RequestParserState::AppendingBody;
           break ;
         }
 
-        return HttpRequestParserResult::ErrorNoEndingCrlfBetweenHeadersAndBody;
+        return RequestParserResult::ErrorNoEndingCrlfBetweenHeadersAndBody;
       }
 
-      case HttpRequestParserState::AppendingBody: {
-        if (method_ == HttpMethod::Head) {
-          return HttpRequestParserResult::ErrorHeadRequestBodyExists;
+      case RequestParserState::AppendingBody: {
+        if (method_ == Method::Head) {
+          return RequestParserResult::ErrorHeadRequestBodyExists;
         }
 
         CELL_LOG_DEBUG("Appending to body [%c] (%X)", ch, ch);
@@ -200,7 +200,7 @@ HttpRequestParserResult HttpRequest::Parse() noexcept {
     ++cursor;
   }
 
-  return HttpRequestParserResult::Ok;
+  return RequestParserResult::Ok;
 }
 
 }  // namespace cell::http

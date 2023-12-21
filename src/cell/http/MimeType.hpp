@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef CELL_HTTPMIMETYPE_HPP
-#define CELL_HTTPMIMETYPE_HPP
+#ifndef CELL_MIMETYPE_HPP
+#define CELL_MIMETYPE_HPP
 
 namespace cell::http {
 //
@@ -17,4 +17,4 @@ namespace cell::http {
 
 }  // namespace cell::http
 
-#endif  // CELL_HTTPMIMETYPE_HPP
+#endif  // CELL_MIMETYPE_HPP

@@ -1,33 +1,33 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#include "HttpMethod.hpp"
+#include "Method.hpp"
 
 #include "cell/Assert.hpp"
 
 namespace cell::http {
 
-HttpMethod HttpMethodFromString(const StringSlice s) noexcept {
+Method HttpMethodFromString(const StringSlice s) noexcept {
   if (s.Compare(StringSlice::FromCString("GET"))) {
-    return HttpMethod::Get;
+    return Method::Get;
   } else if (s.Compare(StringSlice::FromCString("POST"))) {
-    return HttpMethod::Post;
+    return Method::Post;
   } else if (s.Compare(StringSlice::FromCString("HEAD"))) {
-    return HttpMethod::Head;
+    return Method::Head;
   } else {
-    return HttpMethod::UnsupportedMethod;
+    return Method::UnsupportedMethod;
   }
 }
 
-StringSlice HttpMethodToString(const HttpMethod method) noexcept {
+StringSlice HttpMethodToString(const Method method) noexcept {
   switch (method) {
-    case HttpMethod::Get:
+    case Method::Get:
       return StringSlice::FromCString("GET");
-    case HttpMethod::Post:
+    case Method::Post:
       return StringSlice::FromCString("POST");
-    case HttpMethod::Head:
+    case Method::Head:
       return StringSlice::FromCString("HEAD");
-    case HttpMethod::UnsupportedMethod:
+    case Method::UnsupportedMethod:
       CELL_PANIC("unknown method");
   }
 }

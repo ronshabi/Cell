@@ -4,7 +4,7 @@
 #include <cell/Scanner.hpp>
 #include <cell/String.hpp>
 #include <cell/StringSlice.hpp>
-#include <cell/http/HttpRequest.hpp>
+#include <cell/http/Request.hpp>
 #include <iostream>
 
 using namespace cell;
