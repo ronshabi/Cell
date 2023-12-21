@@ -12,26 +12,43 @@
 #include "cell/Scanner.hpp"
 #include "cell/String.hpp"
 #include "cell/StringSlice.hpp"
+#include "cell/WeakStringMap.hpp"
 
 namespace cell::http {
 
-enum class HttpRequestParsingStatus {
+enum class HttpRequestParserResult {
   Ok,
-  ErrorMethodInvalid,
   ErrorInvalidRequest,
-  ErrorInvalidHttpVersion,
+  ErrorMethodInvalid,
+  ErrorVersionInvalid,
+  ErrorNoCrlfAfterRequestLine,
   ErrorUriTooLong,
+  ErrorNoFieldLines,
+  ErrorFieldLineStartsWithWhitespace,
 };
+
+enum class HttpRequestParserState {
+  NeedMethod,
+  NeedTarget,
+  NeedVersion,
+  NeedCrlfAfterRequestLine,
+  NeedHeaderKey,
+  EatingWhitespaceAfterHeaderKey,
+  NeedHeaderValue,
+  NeedCrlfAfterHeaderValue,
+  AppendingBody,
+};
+
 
 class HttpRequest {
  public:
   explicit HttpRequest(String* databuffer) noexcept;
 
-  [[nodiscard]] HttpRequestParsingStatus Parse() noexcept;
+  [[nodiscard]] HttpRequestParserResult Parse() noexcept;
 
   [[nodiscard]] HttpVersion GetVersion() const noexcept { return version_; }
   [[nodiscard]] HttpMethod GetMethod() const noexcept { return method_; }
-  [[nodiscard]] StringSlice GetTarget() const noexcept { return uri_buffer_.SubSlice(); }
+  [[nodiscard]] StringSlice GetTarget() const noexcept { return uri_.GetPath(); }
   [[nodiscard]] StringSlice GetUserAgent() const noexcept { return user_agent_.SubSlice(); }
   [[nodiscard]] StringSlice GetHost() const noexcept { return host_.SubSlice(); }
   [[nodiscard]] StringSlice GetReferrer() const noexcept { return referrer_.SubSlice(); }
@@ -46,20 +63,22 @@ class HttpRequest {
   static constexpr uint64_t kDefaultHeaderValueCapacity = 4096;
 
   String* data_;
-  String parse_buffer_{kDefaultBufferCapacity};
-  String misc_buffer_{kDefaultBufferCapacity};
-  Scanner scanner_{data_};
+  String buf1{kDefaultBufferCapacity};
+  String buf2{kDefaultBufferCapacity};
 
-  HttpVersion version_;
-  HttpMethod method_;
-  //  HttpUri uri_buffer_{}; TODO: Use this
-  String uri_buffer_{kDefaultBufferCapacity};
+  HttpRequestParserState parser_state_{HttpRequestParserState::NeedMethod};
+
+
+  HttpVersion version_{HttpVersion::UnsupportedVersion};
+  HttpMethod method_{HttpMethod::UnsupportedMethod};
+  HttpUri uri_{};
   HttpEncoding accept_encoding_{None};
   HttpConnection connection_{HttpConnection::Close};
   bool upgrade_insecure_requests_{false};
   String host_{kDefaultHeaderValueCapacity};
   String referrer_{kDefaultHeaderValueCapacity};
   String user_agent_{kDefaultHeaderValueCapacity};
+  WeakStringMap headers_{};
 };
 
 }  // namespace cell::http

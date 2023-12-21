@@ -178,7 +178,7 @@ void String::Replace(const StringSlice candidate, const StringSlice replacement)
       modified.AppendStringSlice(replacement);
       i += candidate.GetLen();
     } else {
-      modified.AppendChar(buf_[i]);
+      modified.AppendByte(buf_[i]);
       ++i;
     }
   }
@@ -210,7 +210,7 @@ void String::ReplaceAnyOf(const std::vector<StringSlice> &candidates,
     }
 
     if (!replaced) {
-      modified.AppendChar(buf_[i]);
+      modified.AppendByte(buf_[i]);
       ++i;
     }
   }
@@ -302,7 +302,7 @@ void String::Clear() noexcept {
   len_ = 0;
 }
 
-void String::AppendChar(uint8_t c) noexcept {
+void String::AppendByte(uint8_t c) noexcept {
   if (len_ + 1 == cap_) [[unlikely]] {
     Grow(cap_ * 2);
   }

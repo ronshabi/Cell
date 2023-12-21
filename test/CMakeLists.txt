@@ -20,3 +20,8 @@ add_executable(StringFuzz StringFuzz.cpp)
 target_link_libraries(StringFuzz PRIVATE cell)
 target_compile_options(StringFuzz PUBLIC -g -fsanitize=${Cell_Test_Sanitizers})
 target_link_options(StringFuzz PUBLIC -g -fsanitize=${Cell_Test_Sanitizers})
+
+add_executable(HttpRequestTest HttpRequestTest.cpp)
+target_link_libraries(HttpRequestTest PRIVATE GTest::gtest_main)
+target_link_libraries(HttpRequestTest PRIVATE cell)
+gtest_discover_tests(HttpRequestTest)

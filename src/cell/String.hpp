@@ -42,6 +42,10 @@ class String {
     return buf_[i];
   }
 
+  [[nodiscard]] constexpr bool IsEmpty() const noexcept {
+    return len_ == 0;
+  }
+
   [[nodiscard]] bool Compare(StringSlice str) const noexcept;
   [[nodiscard]] bool CompareIgnoreCase(StringSlice slice) const noexcept;
   [[nodiscard]] bool Contains(uint8_t byte) const noexcept;
@@ -71,7 +75,7 @@ class String {
   void TrimRight(uint8_t delimiter = ' ') noexcept;
   void Clear() noexcept;
 
-  void AppendChar(uint8_t c) noexcept;
+  void AppendByte(uint8_t c) noexcept;
   void AppendCString(const char *cstr) noexcept;
   void AppendStringSlice(StringSlice slice) noexcept;
   void AppendString(const String &other) noexcept;

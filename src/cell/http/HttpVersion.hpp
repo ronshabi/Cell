@@ -10,7 +10,7 @@
 
 namespace cell::http {
 
-enum class HttpVersion { Http1, Http1_1, Http2, Http3, HttpUnsupportedVersion };
+enum class HttpVersion { Http1, Http1_1, Http2, Http3, UnsupportedVersion };
 
 [[nodiscard]] HttpVersion HttpVersionFromString(StringSlice slice) noexcept;
 [[nodiscard]] StringSlice HttpVersionToString(HttpVersion version) noexcept;

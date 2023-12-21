@@ -3,7 +3,9 @@
 
 #include "Scanner.hpp"
 
+#include "Charset.hpp"
 #include "Memory.hpp"
+#include "StringSlice.hpp"
 #include "log/Log.hpp"
 
 namespace cell {
@@ -65,7 +67,7 @@ void Scanner::AppendToBufferUntilHittingChar(String &outbuffer, uint8_t ch) noex
       break;
     }
 
-    outbuffer.AppendChar(current);
+    outbuffer.AppendByte(current);
     //    CELL_LOG_DEBUG("Appending [%c]", current);
   }
 }
@@ -73,13 +75,16 @@ void Scanner::AppendToBufferUntilHittingChar(String &outbuffer, uint8_t ch) noex
 bool Scanner::AdvanceContinuousExactly(const uint8_t ch, uint64_t amount) noexcept {
   CELL_ASSERT(amount != 0);
 
+  CELL_LOG_DEBUG("Before call: cursor @ %lu/%lu", cursor_, string_->len_);
+
   while (true) {
     const uint8_t current = GetNextChar();
     CELL_LOG_DEBUG("Cursor at (%lu/%lu) [0x%X]. Target: 0x%X Amount left: %lu, EOF: %d", cursor_,
                    string_->len_, ch, current, amount, eof_);
     if (!eof_ && current == ch) {
-      CELL_LOG_DEBUG("Found [0x%X]", current);
       --amount;
+      CELL_LOG_DEBUG("FOUND at (%lu/%lu) [0x%X]. Target: 0x%X Amount left: %lu, EOF: %d", cursor_,
+                     string_->len_, ch, current, amount, eof_);
     }
 
     if (eof_) {
@@ -106,17 +111,21 @@ bool Scanner::AdvanceContinuousExactly(const uint8_t ch, uint64_t amount) noexce
 //  return cnt;
 //}
 
-//
-// uint64_t Scanner::AdvanceAnyOf(const StringSlice charset) noexcept {
-//  uint64_t cnt = 0;
-//
-//  while (!eof_ && String::isAnyOf(Peek(), charset)) {
-//    Advance();
-//    ++cnt;
-//  }
-//
-//  return cnt;
-//}
+uint64_t Scanner::AdvanceAnyOf(const StringSlice charset) noexcept {
+  uint64_t cnt = 0;
+
+  while (!eof_ && String::isAnyOf(Peek(), charset)) {
+    Advance();
+    ++cnt;
+  }
+
+  return cnt;
+}
+
+uint64_t Scanner::AdvanceWhitespace() noexcept {
+  return AdvanceAnyOf(StringSlice::FromCString(kAsciiWhitespace));
+}
+
 //
 // uint64_t Scanner::AdvanceUntilAnyOf(const char *charset) noexcept {
 //  uint64_t cnt = 0;

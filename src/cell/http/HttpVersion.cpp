@@ -17,7 +17,7 @@ HttpVersion HttpVersionFromString(StringSlice slice) noexcept {
   } else if (slice.Compare(StringSlice::FromCString("HTTP/3"))) {
     return HttpVersion::Http3;
   } else {
-    return HttpVersion::HttpUnsupportedVersion;
+    return HttpVersion::UnsupportedVersion;
   }
 }
 
@@ -31,7 +31,7 @@ StringSlice HttpVersionToString(HttpVersion version) noexcept {
       return StringSlice::FromCString("HTTP/2");
     case HttpVersion::Http3:
       return StringSlice::FromCString("HTTP/3");
-    case HttpVersion::HttpUnsupportedVersion:
+    case HttpVersion::UnsupportedVersion:
       CELL_PANIC("invalid http version");
   }
 }
