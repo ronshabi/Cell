@@ -23,11 +23,13 @@ RequestParserResult Request::Parse() noexcept {
   data_->RefreshLength();
   buf1.Clear();
   buf2.Clear();
+  uri_.ClearDataBuffer();
+  body_.Clear();
 
   //  CELL_LOG_DEBUG("Parsing request [%s]", data_->SubSlice(0, 1));
 
   while (cursor != data_->GetLen()) {
-    ch = data_->CharAt(cursor);
+    ch = data_->ByteAt(cursor);
 
     switch (parser_state_) {
       case RequestParserState::NeedMethod: {
@@ -50,15 +52,21 @@ RequestParserResult Request::Parse() noexcept {
 
       case RequestParserState::NeedTarget: {
         if (IsWhitespace(ch)) {
-          CELL_LOG_DEBUG("URI (Target) Buffer = '%s'", buf1.GetCString());
+          CELL_LOG_DEBUG("URI (Target) Buffer = '%s'",
+                         uri_.GetDataBufferAsSlice().GetConstCharPtr());
 
-          uri_.SetBufferContents(buf1);
+          // Parse URI
+          const auto result = uri_.Parse();
+
+          if (result != UriParserResult::Ok) {
+            return RequestParserResult::ErrorUriInvalid;
+          }
+
           parser_state_ = RequestParserState::NeedVersion;
-          buf1.Clear();
           break;
         }
 
-        buf1.AppendByte(ch);
+        uri_.AppendByteToDataBuffer(ch);
         break;
       }
 
@@ -81,7 +89,7 @@ RequestParserResult Request::Parse() noexcept {
       }
 
       case RequestParserState::NeedCrlfAfterRequestLine: {
-        if (data_->CharAt(cursor) != kLF) {
+        if (data_->ByteAt(cursor) != kLF) {
           return RequestParserResult::ErrorNoCrlfAfterRequestLine;
         }
 
@@ -152,7 +160,7 @@ RequestParserResult Request::Parse() noexcept {
             }
           } else if (buf1.Compare(StringSlice::FromCString("accept-encoding"))) {
             CELL_LOG_DEBUG("[~] Passing accept-encoding string of '%s' to designated parser", buf1.GetCString());
-            accept_encoding_ = encoding::ParseFromString(buf2.SubSlice());
+            accept_encoding_ = encoding::ParseFromRequestHeader(buf2.SubSlice());
 
             if (accept_encoding_ == encoding::kErrorParsing) {
               CELL_LOG_DEBUG_SIMPLE("[!!!] Failed parsing accept-encoding, defaults to None");
@@ -177,7 +185,7 @@ RequestParserResult Request::Parse() noexcept {
       case RequestParserState::NeedCrlfAfterHeaderValue: {
 //        CELL_LOG_DEBUG("RequestParserState::NeedCrlfAfterHeaderValue: Cursor at %02X", ch);
 
-        if (data_->CharAt(cursor) == kLF) {
+        if (data_->ByteAt(cursor) == kLF) {
           parser_state_ = RequestParserState::NeedHeaderKey;
           break ;
         }
@@ -187,7 +195,7 @@ RequestParserResult Request::Parse() noexcept {
 
       case RequestParserState::NeedCrlfBetweenHeadersAndBody: {
         // end of headers?
-        if (data_->CharAt(cursor) == kLF) {
+        if (data_->ByteAt(cursor) == kLF) {
           parser_state_ = RequestParserState::AppendingBody;
           break ;
         }
@@ -200,8 +208,8 @@ RequestParserResult Request::Parse() noexcept {
           return RequestParserResult::ErrorHeadRequestBodyExists;
         }
 
-        CELL_LOG_DEBUG("Appending to body [%c] (%X)", ch, ch);
-        buf1.AppendByte(ch);
+//        CELL_LOG_DEBUG("Appending to body [%c] (%X)", ch, ch);
+        body_.AppendByte(ch);
         break;
       }
     }

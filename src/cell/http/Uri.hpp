@@ -13,23 +13,49 @@
 
 namespace cell::http {
 
+enum class UriParserResult {
+  Ok,
+  UnsupportedUriType,
+};
+
+enum class UriParserState { GetType, GetPath, GetQueryKey, GetQueryValue };
+
+enum class UriType {
+  Absolute,
+  Relative,
+};
+
 class Uri {
  public:
   explicit Uri() noexcept = default;
 
-  void SetBufferContents(const String& other) noexcept {
-    path_ = other;
-  }
+  [[nodiscard]] StringSlice GetPath() const noexcept { return path_.SubSlice(); }
 
-  StringSlice GetPath() const noexcept {
-    return path_.SubSlice();
-  }
+  void AppendByteToDataBuffer(uint8_t ch) noexcept { data_.AppendByte(ch); }
+
+  void ClearDataBuffer() noexcept { data_.Clear(); }
+
+  [[nodiscard]] UriParserResult Parse() noexcept;
+
+  [[nodiscard]] StringSlice GetDataBufferAsSlice() const noexcept { return data_.SubSlice(); }
 
  private:
-  static constexpr uint64_t kDefaultUriBufferCapacity = 4096;
+  static constexpr uint64_t kDefaultUriBufferCapacity = 1024;
+  static constexpr uint64_t kDefaultUriPathCapacity = 256;
+  static constexpr uint64_t kDefaultQueryKeyBufferCapacity = 64;
+  static constexpr uint64_t kDefaultQueryValueBufferCapacity = 256;
 
-  String path_{kDefaultUriBufferCapacity};
-  WeakStringCache queries_;
+  UriParserState state_{UriParserState::GetType};
+
+  String data_{kDefaultUriBufferCapacity};
+
+  String path_{kDefaultUriPathCapacity};
+  String query_key_{kDefaultQueryKeyBufferCapacity};
+  String query_value_{kDefaultQueryValueBufferCapacity};
+
+  WeakStringCache queries_{};
+
+  UriType uri_type_{UriType::Absolute};
 };
 
 }  // namespace cell::http

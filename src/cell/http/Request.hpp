@@ -25,6 +25,7 @@ enum class RequestParserResult {
   ErrorNoCrlfAfterHeaderValue,
   ErrorNoEndingCrlfBetweenHeadersAndBody,
   ErrorUriTooLong,
+  ErrorUriInvalid,
   ErrorFieldLineStartsWithWhitespace,
   ErrorHeadRequestBodyExists,
 };
@@ -51,10 +52,11 @@ class Request {
 
   [[nodiscard]] Version GetVersion() const noexcept { return version_; }
   [[nodiscard]] Method GetMethod() const noexcept { return method_; }
-  [[nodiscard]] StringSlice GetTarget() const noexcept { return uri_.GetPath(); }
+  [[nodiscard]] StringSlice GetTarget() const noexcept { return uri_.GetDataBufferAsSlice(); }
   [[nodiscard]] StringSlice GetUserAgent() const noexcept { return user_agent_.SubSlice(); }
   [[nodiscard]] StringSlice GetHost() const noexcept { return host_.SubSlice(); }
   [[nodiscard]] StringSlice GetReferrer() const noexcept { return referrer_.SubSlice(); }
+  [[nodiscard]] StringSlice GetBody() const noexcept { return body_.SubSlice(); }
   [[nodiscard]] encoding::EncodingSet GetAcceptEncoding() const noexcept { return accept_encoding_; }
   [[nodiscard]] Connection GetConnectionType() const noexcept { return connection_; }
   [[nodiscard]] bool CanUpgradeInsecureConnections() const noexcept {
@@ -68,6 +70,7 @@ class Request {
   String* data_;
   String buf1{kDefaultBufferCapacity};
   String buf2{kDefaultBufferCapacity};
+  String body_{kDefaultBufferCapacity};
 
   RequestParserState parser_state_{RequestParserState::NeedMethod};
 

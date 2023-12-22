@@ -15,8 +15,8 @@ enum class EncodingParserState {
 };
 }
 
-EncodingSet ParseFromString(const StringSlice slice) noexcept {
-  String buf(16);
+EncodingSet ParseFromRequestHeader(const StringSlice slice) noexcept {
+  String buf(kEncodingBufferSize);
   uint64_t cursor = 0;
   uint8_t ch;
 
@@ -25,7 +25,6 @@ EncodingSet ParseFromString(const StringSlice slice) noexcept {
   EncodingSet set = kNone;
 
   while (!end) {
-
     if (cursor != slice.GetLen()) {
       ch = slice.ByteAt(cursor);
     } else {

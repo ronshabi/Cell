@@ -8,12 +8,9 @@
 
 #include "cell/core/StringSlice.hpp"
 
-namespace cell::http {
-
-
-
-namespace encoding {
+namespace cell::http::encoding {
 using EncodingSet = uint64_t;
+constexpr uint64_t kEncodingBufferSize = 16;
 
 constexpr EncodingSet kErrorParsing = static_cast<EncodingSet>(-1);
 constexpr EncodingSet kNone = 0;
@@ -22,9 +19,7 @@ constexpr EncodingSet kGzip = 0b10;
 constexpr EncodingSet kBrotli = 0b100;
 constexpr EncodingSet kZstd = 0b100;
 
-[[nodiscard]] EncodingSet ParseFromString(StringSlice slice) noexcept;
-
-}
+[[nodiscard]] EncodingSet ParseFromRequestHeader(StringSlice slice) noexcept;
 
 }
 

@@ -35,7 +35,7 @@ add_library(cell STATIC
         http/Uri.cpp
         http/Uri.hpp
         core/Router.cpp
-        core/Router.hpp http/Encoding.cpp)
+        core/Router.hpp http/Encoding.cpp core/Types.hpp)
 
 
 target_include_directories(cell PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)
