@@ -25,3 +25,8 @@ add_executable(HttpRequestTest HttpRequestTest.cpp)
 target_link_libraries(HttpRequestTest PRIVATE GTest::gtest_main)
 target_link_libraries(HttpRequestTest PRIVATE cell)
 gtest_discover_tests(HttpRequestTest)
+
+add_executable(UriDecodeTest UriDecodeTest.cpp)
+target_link_libraries(UriDecodeTest PRIVATE GTest::gtest_main)
+target_link_libraries(UriDecodeTest PRIVATE cell)
+gtest_discover_tests(UriDecodeTest)

@@ -3,6 +3,8 @@
 
 #include "Uri.hpp"
 
+#include "cell/core/Charset.hpp"
+#include "cell/core/Types.hpp"
 #include "cell/log/Log.hpp"
 
 namespace cell::http {
@@ -71,5 +73,34 @@ UriParserResult Uri::Parse() noexcept {
   }
 
   return UriParserResult::Ok;
+}
+
+bool Uri::Decode(const StringSlice slice, String& out) {
+  u64 cursor = 0;
+  u8 ch;
+  bool fail_flag = false;
+
+  while (cursor < slice.GetLen()) {
+    ch = slice.ByteAt(cursor);
+
+    if (ch == '%') {
+      if (cursor + 2 >= slice.GetLen()) {
+        return false;
+      }
+      const auto decoded_byte = HexPairToByte(slice.ByteAt(cursor + 1), slice.ByteAt(cursor + 2), fail_flag);
+      if (fail_flag) {
+        return false; // fail, '%' with 2 non-hexdigs
+      }
+
+      out.AppendByte(decoded_byte);
+      cursor += 2;
+    } else {
+      out.AppendByte(ch);
+    }
+
+    ++cursor;
+  }
+
+  return true;
 }
 }  // namespace cell::http

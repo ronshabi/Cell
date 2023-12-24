@@ -5,6 +5,7 @@
 #define CELL_CHARSET_HPP
 
 #include "cell/core/Types.hpp"
+#include "cell/log/Log.hpp"
 
 namespace cell {
 
@@ -17,6 +18,8 @@ constexpr u8 kSP = 0x20;
 constexpr u8 kLF = 0x0A;
 constexpr u8 kCR = 0x0D;
 constexpr u8 kHTAB = 0x09;
+
+constexpr u8 kHexConversionFailure = 0xff;
 
 constexpr const char *kAsciiLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 constexpr const char *kAsciiUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -54,6 +57,34 @@ constexpr const char *kAsciiWhitespace = " \n\t\r\f\v";
 
 [[nodiscard]] constexpr bool IsHex(const u8 byte) noexcept {
   return IsHexUppercase(byte) || (byte >= 0x61 && byte <= 0x66);
+}
+
+[[nodiscard]] constexpr u8 HexDigitToByte(u8 dig) {
+  if (dig >= 'A' && dig <= 'F') {
+    return dig - 'A' + 10;
+  } else if (dig >= 'a' && dig <= 'f') {
+    return dig - 'a' + 10;
+  } else if (dig >= '0' && dig <= '9') {
+    return dig - '0';
+  }
+
+  return kHexConversionFailure; // not a hexdig
+}
+
+[[nodiscard]] constexpr u8 HexPairToByte(const u8 msb, const u8 lsb, bool& failed) noexcept {
+  const auto msb_num = HexDigitToByte(msb);
+  if (msb_num == kHexConversionFailure) {
+    failed = true;
+    return kHexConversionFailure;
+  }
+
+  const auto lsb_num = HexDigitToByte(lsb);
+  if (lsb_num == kHexConversionFailure) {
+    failed = true;
+    return kHexConversionFailure;
+  }
+
+  return 16 * msb_num + lsb_num;
 }
 
 [[nodiscard]] constexpr bool IsWhitespace(const u8 byte) noexcept {
@@ -117,9 +148,9 @@ namespace rfc3986 {
 //}
 
 
-[[nodiscard]] constexpr bool IsPChar(const u8 ch) noexcept {
-  return IsUnreserved(ch) || IsPctEncoded(ch) || IsSubDelim(ch) || ch == ':' || ch == '@';
-}
+//[[nodiscard]] constexpr bool IsPChar(const u8 ch) noexcept {
+//  return IsUnreserved(ch) || IsPctEncoded(ch) || IsSubDelim(ch) || ch == ':' || ch == '@';
+//}
 
 }
 

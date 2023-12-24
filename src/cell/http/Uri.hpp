@@ -39,6 +39,8 @@ class Uri {
 
   [[nodiscard]] StringSlice GetDataBufferAsSlice() const noexcept { return data_.SubSlice(); }
 
+  [[nodiscard]] static bool Decode(StringSlice slice, String& out);
+
  private:
   static constexpr uint64_t kDefaultUriBufferCapacity = 1024;
   static constexpr uint64_t kDefaultUriPathCapacity = 256;
