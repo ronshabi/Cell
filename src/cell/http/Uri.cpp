@@ -37,7 +37,15 @@ UriParserResult Uri::Parse() noexcept {
       case UriParserState::GetPath: {
         if (ch == '?') {
           state_ = UriParserState::GetQueryKey;
+
           CELL_LOG_DEBUG("URI Path: [%s]", path_.GetCString());
+
+          if (!Uri::Decode(path_.SubSlice(), path_decoded_)) {
+            CELL_LOG_DEBUG_SIMPLE("Could not decode URI path");
+            return UriParserResult::DecodingPathFailed;
+          }
+
+          CELL_LOG_DEBUG("URI Path Decoded: [%s]", path_decoded_.GetCString());
           break;
         }
 
@@ -58,7 +66,16 @@ UriParserResult Uri::Parse() noexcept {
           state_ = UriParserState::GetQueryKey;
           CELL_LOG_DEBUG("URI Query Key: [%s] -> [%s]", query_key_.GetCString(),
                          query_value_.GetCString());
-          queries_.AddKeyValuePair(query_key_, query_value_);
+
+          if (!Uri::Decode(query_value_.SubSlice(), query_value_decoded_)) {
+            CELL_LOG_DEBUG_SIMPLE("URI Query Value decoding failed");
+            return UriParserResult::DecodingQueryValueFailed;
+          }
+
+          CELL_LOG_DEBUG("URI Query Key Decoded: [%s] -> [%s]", query_key_.GetCString(),
+                         query_value_decoded_.GetCString());
+
+          queries_.AddKeyValuePair(query_key_, query_value_decoded_);
           query_key_.Clear();
           query_value_.Clear();
           break;

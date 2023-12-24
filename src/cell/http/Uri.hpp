@@ -16,6 +16,8 @@ namespace cell::http {
 enum class UriParserResult {
   Ok,
   UnsupportedUriType,
+  DecodingQueryValueFailed,
+  DecodingPathFailed,
 };
 
 enum class UriParserState { GetType, GetPath, GetQueryKey, GetQueryValue };
@@ -52,8 +54,10 @@ class Uri {
   String data_{kDefaultUriBufferCapacity};
 
   String path_{kDefaultUriPathCapacity};
+  String path_decoded_{kDefaultUriPathCapacity};
   String query_key_{kDefaultQueryKeyBufferCapacity};
   String query_value_{kDefaultQueryValueBufferCapacity};
+  String query_value_decoded_{kDefaultQueryValueBufferCapacity};
 
   WeakStringCache queries_{};
 

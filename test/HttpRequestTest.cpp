@@ -4,11 +4,8 @@
 #include <gtest/gtest.h>
 
 #include <cell/http/Request.hpp>
-
-#include "cell/core/String.hpp"
-#include "cell/http/Connection.hpp"
-#include "cell/http/Encoding.hpp"
-#include "cell/http/Method.hpp"
+#include <cell/core/String.hpp>
+#include <cell/core/StringSlice.hpp>
 
 using namespace cell;
 using cell::http::Request;
