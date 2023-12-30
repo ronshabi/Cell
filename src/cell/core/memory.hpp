@@ -8,47 +8,47 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "Assert.hpp"
+#include "assert.hpp"
 
 namespace cell {
 
 template <typename T>
-[[nodiscard]] inline T* Malloc(const uint64_t bytes) noexcept {
+[[nodiscard]] inline T* mem_alloc(const uint64_t bytes) noexcept {
   CELL_ASSERT(bytes != 0);
 
   T* ptr = reinterpret_cast<T*>(::malloc(bytes));
   if (ptr == nullptr) [[unlikely]] {
-    CELL_PANIC("cell::Malloc failed");
+    CELL_PANIC("cell::mem_alloc failed");
   }
 
   return ptr;
 }
 
 template <typename T>
-[[nodiscard]] inline T* Realloc(T* ptr, uint64_t new_size) noexcept {
+[[nodiscard]] inline T* mem_realloc(T* ptr, uint64_t new_size) noexcept {
   if (ptr == nullptr) [[unlikely]] {
-    CELL_PANIC("cell::Realloc was called with a null pointer")
+    CELL_PANIC("cell::mem_realloc was called with a null pointer")
   }
 
   CELL_ASSERT(new_size != 0);
 
   T* new_ptr = reinterpret_cast<T*>(::realloc(ptr, new_size));
   if (new_ptr == nullptr) [[unlikely]] {
-    CELL_PANIC("cell::Realloc failed")
+    CELL_PANIC("cell::mem_realloc failed")
   }
 
   return new_ptr;
 }
 
-inline void Free(void* ptr) noexcept {
+inline void mem_free(void* ptr) noexcept {
   if (ptr) [[likely]] {
     ::free(ptr);
   }
 }
 
-inline void MemZero(void* ptr, const uint64_t length) noexcept {
+inline void mem_zero(void* ptr, const uint64_t length) noexcept {
   if (!ptr) [[unlikely]] {
-    CELL_PANIC("cell::MemZero was called with nullptr")
+    CELL_PANIC("cell::mem_zero was called with nullptr")
   }
 
   CELL_ASSERT(length != 0);
@@ -57,16 +57,16 @@ inline void MemZero(void* ptr, const uint64_t length) noexcept {
 
 // Zero all memory in range [ptr0, ptr1)
 // Like STL Iterators, ptr1 should be 1 byte after the last byte to be zeroed
-inline void MemZeroPtrRange(void* ptr0, void* ptr1) noexcept {
+inline void mem_zero_ptr_range(void* ptr0, void* ptr1) noexcept {
   if (ptr0 == nullptr || ptr1 == nullptr) [[unlikely]] {
-    CELL_PANIC("cell::MemZeroPtrRange was called with a nullptr")
+    CELL_PANIC("cell::mem_zero_ptr_range was called with a nullptr")
   }
 
   CELL_ASSERT(ptr0 != ptr1);
   ::memset(ptr0, 0, static_cast<size_t>(static_cast<char*>(ptr1) - static_cast<char*>(ptr0)));
 }
 
-inline bool MemCompare(const void* ptr0, const void* ptr1, const uint64_t length) noexcept {
+inline bool mem_compare(const void* ptr0, const void* ptr1, const uint64_t length) noexcept {
   if (ptr0 == nullptr || ptr1 == nullptr) [[unlikely]] {
     CELL_PANIC("cell::MemCpy was called with a nullptr")
   }
@@ -75,7 +75,7 @@ inline bool MemCompare(const void* ptr0, const void* ptr1, const uint64_t length
   return ::memcmp(ptr0, ptr1, length) == 0;
 }
 
-inline void MemCopy(void* dest, const void* src, const uint64_t length) noexcept {
+inline void mem_copy(void* dest, const void* src, const uint64_t length) noexcept {
   if (dest == nullptr || src == nullptr) [[unlikely]] {
     CELL_PANIC("cell::MemCpy was called with a nullptr")
   }
@@ -84,7 +84,7 @@ inline void MemCopy(void* dest, const void* src, const uint64_t length) noexcept
   ::memcpy(dest, src, length);
 }
 
-[[nodiscard]] inline uint64_t Strlen(const char* str) noexcept { return strlen(str); }
+[[nodiscard]] inline uint64_t string_length(const char* str) noexcept { return strlen(str); }
 
 }  // namespace cell
 

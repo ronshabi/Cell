@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
-#include "Encoding.hpp"
+#include "encoding.hpp"
 
-#include "cell/core/Charset.hpp"
-#include "cell/core/String.hpp"
+#include "cell/core/charset.hpp"
+#include "cell/core/string.hpp"
 #include "cell/log/Log.hpp"
 
 namespace cell::http::encoding {
@@ -15,8 +15,8 @@ enum class EncodingParserState {
 };
 }
 
-EncodingSet ParseFromRequestHeader(const StringSlice slice) noexcept {
-  String buf(kEncodingBufferSize);
+EncodingSet parse_from_request_header(const StringSlice slice) noexcept {
+  String buf(ENCODING_BUFFER_SIZE);
   uint64_t cursor = 0;
   uint8_t ch;
 
@@ -25,46 +25,46 @@ EncodingSet ParseFromRequestHeader(const StringSlice slice) noexcept {
   EncodingSet set = kNone;
 
   while (!end) {
-    if (cursor != slice.GetLen()) {
-      ch = slice.ByteAt(cursor);
+    if (cursor != slice.get_length()) {
+      ch = slice.byte_at(cursor);
     } else {
       end = true;
     }
 
-//    CELL_LOG_DEBUG("Parse Encoding: at byte '%c' buf: '%s'", ch, buf.GetCString());
+//    CELL_LOG_DEBUG("parse Encoding: at byte '%c' buf: '%s'", ch, buf.get_c_str());
 
     switch (state) {
       case EncodingParserState::GetEncoding: {
         if (ch == ',' || end) {
-          if (buf.Compare(StringSlice::FromCString("gzip"))) {
+          if (buf.compare(StringSlice::from_cstr("gzip"))) {
             CELL_LOG_DEBUG_SIMPLE("encoding: +gzip");
-            set |= kGzip;
-          } else if (buf.Compare(StringSlice::FromCString("deflate"))) {
+            set |= GZIP;
+          } else if (buf.compare(StringSlice::from_cstr("deflate"))) {
             CELL_LOG_DEBUG_SIMPLE("encoding: +deflate");
-            set |= kDeflate;
-          } else if (buf.Compare(StringSlice::FromCString("br"))) {
+            set |= DEFLATE;
+          } else if (buf.compare(StringSlice::from_cstr("br"))) {
             CELL_LOG_DEBUG_SIMPLE("encoding: +brotli");
-            set |= kBrotli;
-          } else if (buf.Compare(StringSlice::FromCString("zstd"))) {
+            set |= BROTLI;
+          } else if (buf.compare(StringSlice::from_cstr("zstd"))) {
             CELL_LOG_DEBUG_SIMPLE("encoding: +zstd");
-            set |= kZstd;
+            set |= ZSTD;
           } else {
-            CELL_LOG_DEBUG("No encoding named: '%s'", buf.GetCString());
-            return kErrorParsing;
+            CELL_LOG_DEBUG("No encoding named: '%s'", buf.get_c_str());
+            return ERROR_PARSING;
           }
 
-          buf.Clear();
+          buf.clear();
           state = EncodingParserState::EatSpaces;
           break ;
-        } else if (ch == kSP) {
-          return kErrorParsing;
+        } else if (ch == SP) {
+          return ERROR_PARSING;
         }
 
-        buf.AppendByte(ch);
+        buf.append_byte(ch);
         break;
       }
       case EncodingParserState::EatSpaces: {
-        if (ch != kSP) {
+        if (ch != SP) {
           state = EncodingParserState::GetEncoding;
           cursor--;
           break ;

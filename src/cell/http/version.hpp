@@ -6,14 +6,14 @@
 
 #include <cstdint>
 
-#include "cell/core/StringSlice.hpp"
+#include "cell/core/string_slice.hpp"
 
 namespace cell::http {
 
 enum class Version { Http1, Http1_1, Http2, Http3, UnsupportedVersion };
 
-[[nodiscard]] Version HttpVersionFromString(StringSlice slice) noexcept;
-[[nodiscard]] StringSlice HttpVersionToString(Version version) noexcept;
+[[nodiscard]] Version version_from_string(StringSlice slice) noexcept;
+[[nodiscard]] StringSlice version_to_string(Version version) noexcept;
 
 }  // namespace cell::http
 

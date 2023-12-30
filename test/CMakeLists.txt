@@ -30,3 +30,8 @@ add_executable(UriDecodeTest UriDecodeTest.cpp)
 target_link_libraries(UriDecodeTest PRIVATE GTest::gtest_main)
 target_link_libraries(UriDecodeTest PRIVATE cell)
 gtest_discover_tests(UriDecodeTest)
+
+add_executable(UriTest UriTest.cpp)
+target_link_libraries(UriTest PRIVATE GTest::gtest_main)
+target_link_libraries(UriTest PRIVATE cell)
+gtest_discover_tests(UriTest)

@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#include <cell/http/Request.hpp>
+#include <cell/http/request.hpp>
 #include <iostream>
 
-#include "cell/core/Scanner.hpp"
-#include "cell/core/String.hpp"
-#include "cell/core/StringSlice.hpp"
+#include "cell/core/scanner.hpp"
+#include "cell/core/string.hpp"
+#include "cell/core/string_slice.hpp"
 
 using namespace cell;
 

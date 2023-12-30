@@ -1,23 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#include "Uri.hpp"
+#include "uri.hpp"
 
-#include "cell/core/Charset.hpp"
-#include "cell/core/Types.hpp"
+#include "cell/core/charset.hpp"
+#include "cell/core/types.hpp"
 #include "cell/log/Log.hpp"
 
 namespace cell::http {
-UriParserResult Uri::Parse() noexcept {
+UriParserResult Uri::parse() noexcept {
   uint64_t cursor = 0;
   uint8_t ch;
   bool end_flag = false;
 
-  CELL_LOG_DEBUG("Parse URI: [%s]", data_.GetCString());
+  CELL_LOG_DEBUG("parse URI: [%s]", m_data.get_c_str());
 
   while (!end_flag) {
-    if (cursor != data_.GetLen()) {
-      ch = data_.ByteAt(cursor);
+    if (cursor != m_data.get_length()) {
+      ch = m_data.byte_at(cursor);
     } else {
       end_flag = true;
     }
@@ -25,7 +25,7 @@ UriParserResult Uri::Parse() noexcept {
     switch (state_) {
       case UriParserState::GetType: {
         if (ch == '/') {
-          uri_type_ = UriType::Relative;
+          m_uri_type = UriType::Relative;
           state_ = UriParserState::GetPath;
           CELL_LOG_DEBUG_SIMPLE("Uri type: Relative");
           break;
@@ -38,18 +38,18 @@ UriParserResult Uri::Parse() noexcept {
         if (ch == '?') {
           state_ = UriParserState::GetQueryKey;
 
-          CELL_LOG_DEBUG("URI Path: [%s]", path_.GetCString());
+          CELL_LOG_DEBUG("URI Path: [%s]", m_path.get_c_str());
 
-          if (!Uri::Decode(path_.SubSlice(), path_decoded_)) {
+          if (!Uri::decode(m_path.slice(), m_path_decoded)) {
             CELL_LOG_DEBUG_SIMPLE("Could not decode URI path");
             return UriParserResult::DecodingPathFailed;
           }
 
-          CELL_LOG_DEBUG("URI Path Decoded: [%s]", path_decoded_.GetCString());
+          CELL_LOG_DEBUG("URI Path Decoded: [%s]", m_path_decoded.get_c_str());
           break;
         }
 
-        path_.AppendByte(ch);
+        m_path.append_byte(ch);
         break;
       }
       case UriParserState::GetQueryKey: {
@@ -58,30 +58,30 @@ UriParserResult Uri::Parse() noexcept {
           break;
         }
 
-        query_key_.AppendByte(ch);
+        m_query_key.append_byte(ch);
         break;
       }
       case UriParserState::GetQueryValue: {
         if (ch == '&' || end_flag) {
           state_ = UriParserState::GetQueryKey;
-          CELL_LOG_DEBUG("URI Query Key: [%s] -> [%s]", query_key_.GetCString(),
-                         query_value_.GetCString());
+          CELL_LOG_DEBUG("URI Query Key: [%s] -> [%s]", m_query_key.get_c_str(),
+                         m_query_value.get_c_str());
 
-          if (!Uri::Decode(query_value_.SubSlice(), query_value_decoded_)) {
+          if (!Uri::decode(m_query_value.slice(), m_query_value_decoded)) {
             CELL_LOG_DEBUG_SIMPLE("URI Query Value decoding failed");
             return UriParserResult::DecodingQueryValueFailed;
           }
 
-          CELL_LOG_DEBUG("URI Query Key Decoded: [%s] -> [%s]", query_key_.GetCString(),
-                         query_value_decoded_.GetCString());
+          CELL_LOG_DEBUG("URI Query Key Decoded: [%s] -> [%s]", m_query_key.get_c_str(),
+                         m_query_value_decoded.get_c_str());
 
-          queries_.AddKeyValuePair(query_key_, query_value_decoded_);
-          query_key_.Clear();
-          query_value_.Clear();
+          m_queries.AddKeyValuePair(m_query_key, m_query_value_decoded);
+          m_query_key.clear();
+          m_query_value.clear();
           break;
         }
 
-        query_value_.AppendByte(ch);
+        m_query_value.append_byte(ch);
         break;
       }
     }
@@ -92,27 +92,28 @@ UriParserResult Uri::Parse() noexcept {
   return UriParserResult::Ok;
 }
 
-bool Uri::Decode(const StringSlice slice, String& out) {
+bool Uri::decode(StringSlice slice, String& out) {
   u64 cursor = 0;
   u8 ch;
   bool fail_flag = false;
 
-  while (cursor < slice.GetLen()) {
-    ch = slice.ByteAt(cursor);
+  while (cursor < slice.get_length()) {
+    ch = slice.byte_at(cursor);
 
     if (ch == '%') {
-      if (cursor + 2 >= slice.GetLen()) {
+      if (cursor + 2 >= slice.get_length()) {
         return false;
       }
-      const auto decoded_byte = HexPairToByte(slice.ByteAt(cursor + 1), slice.ByteAt(cursor + 2), fail_flag);
+      const auto decoded_byte =
+          hex_pair_to_byte(slice.byte_at(cursor + 1), slice.byte_at(cursor + 2), fail_flag);
       if (fail_flag) {
         return false; // fail, '%' with 2 non-hexdigs
       }
 
-      out.AppendByte(decoded_byte);
+      out.append_byte(decoded_byte);
       cursor += 2;
     } else {
-      out.AppendByte(ch);
+      out.append_byte(ch);
     }
 
     ++cursor;

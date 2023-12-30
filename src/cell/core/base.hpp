@@ -8,7 +8,7 @@
 
 namespace cell {
 
-[[nodiscard]] constexpr uint64_t RoundUp8(const uint64_t num) noexcept {
+[[nodiscard]] constexpr uint64_t round_up_8(const uint64_t num) noexcept {
   if (num % 8 == 0) {
     return num;
   }
@@ -16,7 +16,7 @@ namespace cell {
   return num - num % 8 + 8;
 }
 
-[[nodiscard]] constexpr uint64_t RoundUp32(const uint64_t num) noexcept {
+[[nodiscard]] constexpr uint64_t round_up_32(const uint64_t num) noexcept {
   if (num % 32 == 0) {
     return num;
   }

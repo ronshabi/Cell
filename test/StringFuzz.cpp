@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include "cell/core/String.hpp"
+#include "cell/core/string.hpp"
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   uint8_t buf[Size + 1];
@@ -13,7 +13,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   buf[Size] = 0;
 
   cell::String mine;
-  mine.AppendCString(reinterpret_cast<const char *>(buf));
+  mine.append_c_str(reinterpret_cast<const char *>(buf));
   return 0;
 }
 

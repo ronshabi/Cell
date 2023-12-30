@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2023 Ron Shabi <ron@ronsh.net>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef CELL_STRINGSLICE_HPP
-#define CELL_STRINGSLICE_HPP
+#ifndef CELL_STRING_SLICE_HPP
+#define CELL_STRING_SLICE_HPP
 
 #include <cstdint>
 
-#include "Assert.hpp"
+#include "assert.hpp"
 
 namespace cell {
 
@@ -20,13 +20,13 @@ class StringSlice {
   StringSlice& operator=(const StringSlice& other) = default;
   StringSlice& operator=(StringSlice&& other) = default;
 
-  [[nodiscard]] static StringSlice FromCString(const char* data) noexcept;
+  [[nodiscard]] static StringSlice from_cstr(const char* data) noexcept;
   [[nodiscard]] static StringSlice FromCString(const char* data, uint64_t len) noexcept;
 
   [[nodiscard]] const char* GetConstCharPtr() const { return reinterpret_cast<const char*>(data_); }
   [[nodiscard]] const uint8_t* GetU8Ptr() const { return data_; }
-  [[nodiscard]] uint64_t GetLen() const { return len_; }
-  [[nodiscard]] uint8_t ByteAt(uint64_t i) const {
+  [[nodiscard]] uint64_t get_length() const { return len_; }
+  [[nodiscard]] uint8_t byte_at(uint64_t i) const {
     CELL_ASSERT(i < len_);
 
     return data_[i];
@@ -43,4 +43,4 @@ class StringSlice {
 
 }  // namespace cell
 
-#endif  // CELL_STRINGSLICE_HPP
+#endif  // CELL_STRING_SLICE_HPP

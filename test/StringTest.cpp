@@ -5,86 +5,89 @@
 
 #include <cstdio>
 
-#include "cell/core/Charset.hpp"
-#include "cell/core/Memory.hpp"
-#include "cell/core/String.hpp"
-#include "cell/core/StringSlice.hpp"
+#include "cell/core/charset.hpp"
+#include "cell/core/memory.hpp"
+#include "cell/core/string.hpp"
+#include "cell/core/string_slice.hpp"
 
 using cell::String;
 using cell::StringSlice;
 
 TEST(StringTest, Basic1) {
   String myString;
-  myString.AppendCString("GET / HTTP/1.1");
+  myString.append_c_str("GET / HTTP/1.1");
 
-  ASSERT_EQ(myString.GetLen(), 14);
-  ASSERT_EQ(myString.GetCap(), 16);
-  ASSERT_STREQ(myString.GetCString(), "GET / HTTP/1.1");
-  ASSERT_TRUE(myString.Compare(StringSlice::FromCString("GET / HTTP/1.1")));
-  ASSERT_TRUE(myString.CompareIgnoreCase(StringSlice::FromCString("Get / http/1.1")));
-  ASSERT_TRUE(myString.Contains('/'));
-  ASSERT_FALSE(myString.Contains('@'));
-  ASSERT_FALSE(myString.Contains(StringSlice::FromCString("123456789")));
-  ASSERT_TRUE(myString.ContainsIgnoreCase(StringSlice::FromCString("http")));
-  ASSERT_FALSE(myString.ContainsAnyOf(StringSlice::FromCString("http")));
-  ASSERT_TRUE(myString.ContainsAnyOf(StringSlice::FromCString("123456789")));
-  ASSERT_TRUE(myString.ContainsAnyOf(StringSlice::FromCString(cell::kAsciiUpper)));
-  ASSERT_FALSE(myString.ContainsJust(StringSlice::FromCString(cell::kAsciiUpper)));
-  ASSERT_TRUE(myString.StartsWith(StringSlice::FromCString("GET")));
-  ASSERT_TRUE(myString.StartsWithIgnoreCase(StringSlice::FromCString("gEt")));
-  ASSERT_TRUE(myString.StartsWithChar('G'));
-  ASSERT_FALSE(myString.StartsWithAnyOfChars(StringSlice::FromCString(cell::kAsciiWhitespace)));
-  ASSERT_TRUE(myString.EndsWithChar('1'));
-  ASSERT_TRUE(myString.EndsWithAnyOfChars(StringSlice::FromCString(cell::kDigits)));
+  ASSERT_EQ(myString.get_length(), 14);
+  ASSERT_EQ(myString.get_capacity(), 16);
+  ASSERT_STREQ(myString.get_c_str(), "GET / HTTP/1.1");
+  ASSERT_TRUE(myString.compare(StringSlice::from_cstr("GET / HTTP/1.1")));
+  ASSERT_TRUE(myString.compare_ignore_case(StringSlice::from_cstr("Get / http/1.1")));
+  ASSERT_TRUE(myString.contains('/'));
+  ASSERT_FALSE(myString.contains('@'));
+  ASSERT_FALSE(myString.contains(StringSlice::from_cstr("123456789")));
+  ASSERT_TRUE(myString.contains_ignore_case(StringSlice::from_cstr("http")));
+  ASSERT_FALSE(myString.contains_any_of(StringSlice::from_cstr("http")));
+  ASSERT_TRUE(myString.contains_any_of(StringSlice::from_cstr("123456789")));
+  ASSERT_TRUE(myString.contains_any_of(StringSlice::from_cstr(cell::ASCII_UPPER)));
+  ASSERT_FALSE(myString.contains_just(StringSlice::from_cstr(cell::ASCII_UPPER)));
+  ASSERT_TRUE(myString.starts_with(StringSlice::from_cstr("GET")));
+  ASSERT_TRUE(myString.starts_with_ignore_case(StringSlice::from_cstr("gEt")));
+  ASSERT_TRUE(myString.starts_with_byte('G'));
+  ASSERT_FALSE(myString.starts_with_any_of_byte(StringSlice::from_cstr(cell::ASCII_WHITESPACE)));
+  ASSERT_TRUE(myString.ends_with_byte('1'));
+  ASSERT_TRUE(myString.ends_with_any_of_bytes(StringSlice::from_cstr(cell::DIGITS)));
 
-  myString.ToLower();
-  myString.ReplaceAnyOf({StringSlice::FromCString(" / "), StringSlice::FromCString("/1.1")}, StringSlice::FromCString(""));
-  //  std::printf("The string is: [%s]\n", myString.GetCString());
-  ASSERT_TRUE(myString.ContainsJust(StringSlice::FromCString(cell::kAsciiLower)));
-  myString.AppendInt64(69420);
-  ASSERT_TRUE(myString.CompareIgnoreCase(StringSlice::FromCString("gethTTp69420")));
-  myString.AppendCString("    ");
-  ASSERT_TRUE(myString.Compare(StringSlice::FromCString("gethttp69420    ")));
-  ASSERT_EQ(myString.GetLen(), 16);
+  myString.to_lower();
+  myString.replace_any_of({StringSlice::from_cstr(" / "), StringSlice::from_cstr("/1.1")},
+                          StringSlice::from_cstr(""));
+  //  std::printf("The string is: [%s]\n", myString.get_c_str());
+  ASSERT_TRUE(myString.contains_just(StringSlice::from_cstr(cell::kAsciiLower)));
+  myString.append_i64(69420);
+  ASSERT_TRUE(myString.compare_ignore_case(StringSlice::from_cstr("gethTTp69420")));
+  myString.append_c_str("    ");
+  ASSERT_TRUE(myString.compare(StringSlice::from_cstr("gethttp69420    ")));
+  ASSERT_EQ(myString.get_length(), 16);
 
-  myString.TrimRight();
-//  std::printf("The string is: [%s]\n", myString.GetCString());
-  ASSERT_TRUE(myString.Compare(StringSlice::FromCString("gethttp69420")));
-  ASSERT_EQ(myString.GetLen(), 12);
+  myString.trim_right();
+//  std::printf("The string is: [%s]\n", myString.get_c_str());
+  ASSERT_TRUE(myString.compare(StringSlice::from_cstr("gethttp69420")));
+  ASSERT_EQ(myString.get_length(), 12);
 
-  const auto current_cap = myString.GetCap();
+  const auto current_cap = myString.get_capacity();
 
-  myString.Clear();
-  ASSERT_EQ(myString.GetLen(), 0);
-  ASSERT_EQ(myString.GetCap(), current_cap);
-  ASSERT_TRUE(myString.ContainsJust({0}));
+  myString.clear();
+  ASSERT_EQ(myString.get_length(), 0);
+  ASSERT_EQ(myString.get_capacity(), current_cap);
+  ASSERT_TRUE(myString.contains_just({0}));
 }
 
 TEST(StringTest, EmptyFile) {
   String myString;
-  ASSERT_TRUE(myString.AppendFileContents("StringCorpus/Empty.input"));
-  ASSERT_EQ(myString.GetLen(), 0);
-  myString.ReplaceAnyOf({StringSlice::FromCString(" "), StringSlice::FromCString("\n")}, StringSlice::FromCString(""));
-  ASSERT_EQ(myString.GetLen(), 0);
-  ASSERT_EQ(myString.GetCap(), 8);
+  ASSERT_TRUE(myString.append_file_contents("StringCorpus/Empty.input"));
+  ASSERT_EQ(myString.get_length(), 0);
+  myString.replace_any_of({StringSlice::from_cstr(" "), StringSlice::from_cstr("\n")},
+                          StringSlice::from_cstr(""));
+  ASSERT_EQ(myString.get_length(), 0);
+  ASSERT_EQ(myString.get_capacity(), 8);
 }
 
 TEST(StringTest, AlotOfHebrew) {
   String myString;
-  ASSERT_TRUE(myString.AppendFileContents("StringCorpus/AlotOfHebrew.input"));
-  ASSERT_EQ(myString.GetLen(), 12306);
+  ASSERT_TRUE(myString.append_file_contents("StringCorpus/AlotOfHebrew.input"));
+  ASSERT_EQ(myString.get_length(), 12306);
 
-  myString.ReplaceAnyOf({StringSlice::FromCString(" "), StringSlice::FromCString("\n")}, StringSlice::FromCString(""));
-//  fprintf(stderr, "[%s]\n", myString.GetCString());
-  ASSERT_EQ(myString.GetLen(), 6102);
+  myString.replace_any_of({StringSlice::from_cstr(" "), StringSlice::from_cstr("\n")},
+                          StringSlice::from_cstr(""));
+//  fprintf(stderr, "[%s]\n", myString.get_c_str());
+  ASSERT_EQ(myString.get_length(), 6102);
 }
 
 TEST(StringTest, NonAsciiChars) {
   String myString;
-  ASSERT_TRUE(myString.AppendFileContents("StringCorpus/NonAsciiChars.input"));
-  ASSERT_EQ(myString.GetLen(), 146);
-  myString.ReplaceAnyOf({StringSlice::FromCString(" ")}, StringSlice::FromCString(""));
-  ASSERT_EQ(myString.GetLen(), 125);
+  ASSERT_TRUE(myString.append_file_contents("StringCorpus/NonAsciiChars.input"));
+  ASSERT_EQ(myString.get_length(), 146);
+  myString.replace_any_of({StringSlice::from_cstr(" ")}, StringSlice::from_cstr(""));
+  ASSERT_EQ(myString.get_length(), 125);
 }
 
 

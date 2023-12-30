@@ -7,35 +7,35 @@ add_compile_definitions(DEBUG)
 add_compile_definitions(LOGGER_DEBUG)
 
 add_library(cell STATIC
-        core/Assert.hpp
-        core/Base.hpp
-        core/Memory.hpp
-        core/Charset.hpp
-        core/String.cpp
-        core/String.hpp
-        core/Scanner.cpp
-        core/Scanner.hpp
-        core/StringSlice.cpp
-        core/StringSlice.hpp
-        core/WeakStringCache.cpp
-        core/WeakStringCache.hpp
+        core/assert.hpp
+        core/base.hpp
+        core/memory.hpp
+        core/charset.hpp
+        core/string.cpp
+        core/string.hpp
+        core/scanner.cpp
+        core/scanner.hpp
+        core/string_slice.cpp
+        core/string_slice.hpp
+        core/weak_string_cache.cpp
+        core/weak_string_cache.hpp
 
         log/Log.hpp
 
-        http/Version.cpp
-        http/Version.hpp
-        http/Method.cpp
-        http/Method.hpp
-        http/Request.cpp
-        http/Request.hpp
-        http/Encoding.hpp
-        http/Connection.hpp
-        http/MimeType.cpp
-        http/MimeType.hpp
-        http/Uri.cpp
-        http/Uri.hpp
-        core/Router.cpp
-        core/Router.hpp http/Encoding.cpp core/Types.hpp)
+        http/version.cpp
+        http/version.hpp
+        http/method.cpp
+        http/method.hpp
+        http/request.cpp
+        http/request.hpp
+        http/encoding.hpp
+        http/connection.hpp
+        http/mime_type.cpp
+        http/mime_type.hpp
+        http/uri.cpp
+        http/uri.hpp
+        core/router.cpp
+        core/router.hpp http/encoding.cpp core/types.hpp encoding/Gzip.cpp encoding/Gzip.hpp)
 
 
 target_include_directories(cell PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)
