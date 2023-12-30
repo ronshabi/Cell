@@ -8,13 +8,13 @@
 namespace cell::http {
 
 Version version_from_string(StringSlice slice) noexcept {
-  if (slice.Compare(StringSlice::from_cstr("HTTP/1"))) {
+  if (slice.compare(StringSlice::from_cstr("HTTP/1"))) {
     return Version::Http1;
-  } else if (slice.Compare(StringSlice::from_cstr("HTTP/1.1"))) {
+  } else if (slice.compare(StringSlice::from_cstr("HTTP/1.1"))) {
     return Version::Http1_1;
-  } else if (slice.Compare(StringSlice::from_cstr("HTTP/2"))) {
+  } else if (slice.compare(StringSlice::from_cstr("HTTP/2"))) {
     return Version::Http2;
-  } else if (slice.Compare(StringSlice::from_cstr("HTTP/3"))) {
+  } else if (slice.compare(StringSlice::from_cstr("HTTP/3"))) {
     return Version::Http3;
   } else {
     return Version::UnsupportedVersion;

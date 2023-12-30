@@ -4,6 +4,8 @@
 #ifndef CELL_LOG_HPP
 #define CELL_LOG_HPP
 
+#include "cell/core/types.hpp"
+
 #ifdef LOGGER_DEBUG
 #define CELL_LOG_DEBUG_SIMPLE(fmt)                                \
   {                                                               \
@@ -23,5 +25,13 @@
 #define CELL_LOG_DEBUG_SIMPLE(...)
 #define CELL_LOG_DEBUG(...)
 #endif
+
+
+namespace cell::log {
+
+// Debug only function
+// If 'LOGGER_DEBUG' is not set, this is a nop
+void hexdump(const u8* ptr, int length, int line_width = 16);
+}
 
 #endif  // CELL_LOG_HPP

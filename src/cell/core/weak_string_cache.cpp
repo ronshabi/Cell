@@ -3,7 +3,7 @@
 
 #include "weak_string_cache.hpp"
 
-#include "cell/log/Log.hpp"
+#include "cell/log/log.hpp"
 #include "string_slice.hpp"
 
 namespace cell {

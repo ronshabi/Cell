@@ -8,11 +8,11 @@
 namespace cell::http {
 
 Method method_from_string(StringSlice s) noexcept {
-  if (s.Compare(StringSlice::from_cstr("GET"))) {
+  if (s.compare(StringSlice::from_cstr("GET"))) {
     return Method::Get;
-  } else if (s.Compare(StringSlice::from_cstr("POST"))) {
+  } else if (s.compare(StringSlice::from_cstr("POST"))) {
     return Method::Post;
-  } else if (s.Compare(StringSlice::from_cstr("HEAD"))) {
+  } else if (s.compare(StringSlice::from_cstr("HEAD"))) {
     return Method::Head;
   } else {
     return Method::UnsupportedMethod;

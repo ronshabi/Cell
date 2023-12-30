@@ -19,7 +19,7 @@ TEST(UriDecodeTest, ShouldNotDecodeOnlyAscii) {
       StringSlice::from_cstr("main/articles/view_page/article.php?article=32~");
 
   ASSERT_TRUE(Uri::decode(encoded_uri, out));
-  ASSERT_STREQ(out.get_c_str(), encoded_uri.GetConstCharPtr());
+  ASSERT_STREQ(out.get_c_str(), encoded_uri.get_const_char_ptr());
 }
 
 TEST(UriDecodeTest, SimpleAsciiDecoding) {

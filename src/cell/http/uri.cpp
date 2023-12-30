@@ -5,7 +5,7 @@
 
 #include "cell/core/charset.hpp"
 #include "cell/core/types.hpp"
-#include "cell/log/Log.hpp"
+#include "cell/log/log.hpp"
 
 namespace cell::http {
 UriParserResult Uri::parse() noexcept {

@@ -7,7 +7,7 @@
 #include "cell/core/scanner.hpp"
 #include "cell/core/string.hpp"
 #include "cell/core/string_slice.hpp"
-#include "cell/log/Log.hpp"
+#include "cell/log/log.hpp"
 #include "encoding.hpp"
 #include "method.hpp"
 #include "uri.hpp"
@@ -53,7 +53,7 @@ RequestParserResult Request::parse() noexcept {
       case RequestParserState::NeedTarget: {
         if (is_whitespace(ch)) {
           CELL_LOG_DEBUG("URI (Target) Buffer = '%s'",
-                         m_uri.get_data_buffer_as_slice().GetConstCharPtr());
+                         m_uri.get_data_buffer_as_slice().get_const_char_ptr());
 
           // parse URI
           const auto result = m_uri.parse();

@@ -10,7 +10,7 @@ TEST(UriParsingTests, SimpleUriToDecode) {
   Uri uri;
   uri.set_data_buffer(StringSlice::from_cstr("/index.php"));
 
-  ASSERT_TRUE(uri.get_path_decoded().Compare(uri.get_path_raw()));
-  ASSERT_STREQ(uri.get_path_decoded().GetConstCharPtr(), "index.php");
+  ASSERT_TRUE(uri.get_path_decoded().compare(uri.get_path_raw()));
+  ASSERT_STREQ(uri.get_path_decoded().get_const_char_ptr(), "index.php");
   ASSERT_TRUE(uri.get_queries().IsEmpty());
 }

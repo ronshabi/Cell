@@ -32,7 +32,7 @@ String::String(uint64_t initial_capacity_hint) noexcept
 String::String(StringSlice slice) noexcept
     : m_cap(round_up_8(slice.get_length())), m_len(slice.get_length()), m_buf(mem_alloc<uint8_t>(m_cap)) {
   mem_zero(m_buf, m_cap);
-  mem_copy(m_buf, slice.GetU8Ptr(), m_len);
+  mem_copy(m_buf, slice.get_u8_ptr(), m_len);
 }
 
 String::String(const String &other) noexcept
@@ -79,11 +79,11 @@ String &String::operator=(String &&other) noexcept {
 // -----------------------------------------------------------------------------
 
 bool String::compare(StringSlice str) const noexcept {
-  return m_len == str.get_length() && impl_compare(str.GetU8Ptr(), m_len, 0);
+  return m_len == str.get_length() && impl_compare(str.get_u8_ptr(), m_len, 0);
 }
 
 bool String::compare_ignore_case(StringSlice slice) const noexcept {
-  return m_len == slice.get_length() && impl_compare_ignore_case(slice.GetU8Ptr(), m_len, 0);
+  return m_len == slice.get_length() && impl_compare_ignore_case(slice.get_u8_ptr(), m_len, 0);
 }
 
 bool String::contains(uint8_t byte) const noexcept {
@@ -98,7 +98,7 @@ bool String::contains(uint8_t byte) const noexcept {
 
 bool String::contains(StringSlice slice) const noexcept {
   for (uint64_t i = 0; i < m_len; i++) {
-    if (impl_compare(slice.GetU8Ptr(), slice.get_length(), i)) {
+    if (impl_compare(slice.get_u8_ptr(), slice.get_length(), i)) {
       return true;
     }
   }
@@ -108,7 +108,7 @@ bool String::contains(StringSlice slice) const noexcept {
 
 bool String::contains_ignore_case(StringSlice slice) const noexcept {
   for (uint64_t i = 0; i < m_len; i++) {
-    if (impl_compare_ignore_case(slice.GetU8Ptr(), slice.get_length(), i)) {
+    if (impl_compare_ignore_case(slice.get_u8_ptr(), slice.get_length(), i)) {
       return true;
     }
   }
@@ -177,7 +177,7 @@ void String::replace(StringSlice candidate, StringSlice replacement) noexcept {
 
   uint64_t i = 0;
   while (i < m_len) {
-    if (impl_compare(candidate.GetU8Ptr(), candidate.get_length(), i)) {
+    if (impl_compare(candidate.get_u8_ptr(), candidate.get_length(), i)) {
       modified.append_slice(replacement);
       i += candidate.get_length();
     } else {
@@ -204,7 +204,7 @@ void String::replace_any_of(const std::vector<StringSlice> &candidates,
     bool replaced = false;
 
     for (uint64_t k = 0; k < candidates_amt; ++k) {
-      if (impl_compare(candidates[k].GetU8Ptr(), candidates[k].get_length(), i)) {
+      if (impl_compare(candidates[k].get_u8_ptr(), candidates[k].get_length(), i)) {
         modified.append_slice(replacement);
         i += candidates[k].get_length();
         replaced = true;
@@ -228,11 +228,11 @@ bool String::starts_with_any_of_byte(StringSlice charset) const noexcept {
 }
 
 bool String::starts_with(StringSlice slice) const noexcept {
-  return impl_compare(slice.GetU8Ptr(), slice.get_length(), 0);
+  return impl_compare(slice.get_u8_ptr(), slice.get_length(), 0);
 }
 
 bool String::starts_with_ignore_case(StringSlice slice) const noexcept {
-  return impl_compare_ignore_case(slice.GetU8Ptr(), slice.get_length(), 0);
+  return impl_compare_ignore_case(slice.get_u8_ptr(), slice.get_length(), 0);
 }
 
 bool String::ends_with_byte(uint8_t byte) const noexcept {
@@ -348,7 +348,7 @@ void String::append_slice(StringSlice slice) noexcept {
     expand(round_up_8(m_len + l + 1));
   }
 
-  memcpy(reinterpret_cast<uint8_t *>(m_buf + m_len), slice.GetU8Ptr(), l);
+  memcpy(reinterpret_cast<uint8_t *>(m_buf + m_len), slice.get_u8_ptr(), l);
   m_len += l;
   m_buf[m_len] = 0;
 }
@@ -485,7 +485,7 @@ bool String::impl_compare_ignore_case(const uint8_t *data, uint64_t length,
 }
 
 bool String::impl_is_any_of(uint8_t candidate, StringSlice charset) noexcept {
-  uint8_t const *ptr = charset.GetU8Ptr();
+  uint8_t const *ptr = charset.get_u8_ptr();
 
   while (*ptr) {
     if (*ptr == candidate) {

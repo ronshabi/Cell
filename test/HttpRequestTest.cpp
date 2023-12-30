@@ -18,9 +18,9 @@ TEST(HttpRequestTest, Head1) {
   const auto result = request.parse();
 
   ASSERT_EQ(result, http::RequestParserResult::Ok);
-  ASSERT_STREQ(cell::http::method_to_string(request.get_method()).GetConstCharPtr(), "HEAD");
-  ASSERT_STREQ(cell::http::version_to_string(request.get_version()).GetConstCharPtr(), "HTTP/1.1");
-  ASSERT_STREQ(request.get_target().GetConstCharPtr(), "/index.php?query=all");
+  ASSERT_STREQ(cell::http::method_to_string(request.get_method()).get_const_char_ptr(), "HEAD");
+  ASSERT_STREQ(cell::http::version_to_string(request.get_version()).get_const_char_ptr(), "HTTP/1.1");
+  ASSERT_STREQ(request.get_target().get_const_char_ptr(), "/index.php?query=all");
 }
 
 TEST(HttpRequestTest, Head2) {
@@ -34,9 +34,9 @@ TEST(HttpRequestTest, Head2) {
   const auto result = request.parse();
 
   ASSERT_EQ(result, http::RequestParserResult::Ok);
-  ASSERT_STREQ(cell::http::method_to_string(request.get_method()).GetConstCharPtr(), "HEAD");
-  ASSERT_STREQ(cell::http::version_to_string(request.get_version()).GetConstCharPtr(), "HTTP/3");
-  ASSERT_STREQ(request.get_target().GetConstCharPtr(), "/");
+  ASSERT_STREQ(cell::http::method_to_string(request.get_method()).get_const_char_ptr(), "HEAD");
+  ASSERT_STREQ(cell::http::version_to_string(request.get_version()).get_const_char_ptr(), "HTTP/3");
+  ASSERT_STREQ(request.get_target().get_const_char_ptr(), "/");
   ASSERT_EQ(request.get_connection_type(), http::Connection::KeepAlive);
 }
 
@@ -52,22 +52,22 @@ TEST(HttpRequestTest, Head3) {
                              "Host: www.example.com\r\n"
                              "Referrer: www.google.com\r\n"
                              "Sec-Fetch-Dest: script\r\n"
-                             "Accept-Encoding: gzip, deflate, br\r\n"
+                             "Accept-Encoding: Gzip, deflate, br\r\n"
                              "\r\n"));
 
   const auto result = request.parse();
 
   ASSERT_EQ(result, http::RequestParserResult::Ok);
-  ASSERT_STREQ(cell::http::method_to_string(request.get_method()).GetConstCharPtr(), "HEAD");
-  ASSERT_STREQ(cell::http::version_to_string(request.get_version()).GetConstCharPtr(), "HTTP/2");
-  ASSERT_STREQ(request.get_target().GetConstCharPtr(), "/script.js?query=true");
+  ASSERT_STREQ(cell::http::method_to_string(request.get_method()).get_const_char_ptr(), "HEAD");
+  ASSERT_STREQ(cell::http::version_to_string(request.get_version()).get_const_char_ptr(), "HTTP/2");
+  ASSERT_STREQ(request.get_target().get_const_char_ptr(), "/script.js?query=true");
 
   ASSERT_EQ(request.get_connection_type(), http::Connection::KeepAlive);
-  ASSERT_STREQ(request.get_user_agent().GetConstCharPtr(),
+  ASSERT_STREQ(request.get_user_agent().get_const_char_ptr(),
                "Mozilla/5.0 (Linux; Android 13;) AppleWebKit/537.36 (KHTML, like Gecko) "
                "Version/4.0 Chrome/107.0.5304.141");
-  ASSERT_STREQ(request.get_host().GetConstCharPtr(), "www.example.com");
-  ASSERT_STREQ(request.get_referrer().GetConstCharPtr(), "www.google.com");
+  ASSERT_STREQ(request.get_host().get_const_char_ptr(), "www.example.com");
+  ASSERT_STREQ(request.get_referrer().get_const_char_ptr(), "www.google.com");
   ASSERT_EQ(request.get_accept_encoding(),
             http::encoding::GZIP | http::encoding::DEFLATE | http::encoding::BROTLI);
   ASSERT_EQ(request.get_can_upgrade_insecure_connections(), true);
@@ -85,24 +85,24 @@ TEST(HttpRequestTest, Post1) {
                              "Host: www.example.com\r\n"
                              "Referrer: www.google.com\r\n"
                              "Sec-Fetch-Dest: script\r\n"
-                             "Accept-Encoding: gzip, deflate, br\r\n"
+                             "Accept-Encoding: Gzip, deflate, br\r\n"
                              "\r\n"
                              "Post Request Body"));
 
   const auto result = request.parse();
 
   ASSERT_EQ(result, http::RequestParserResult::Ok);
-  ASSERT_STREQ(cell::http::method_to_string(request.get_method()).GetConstCharPtr(), "POST");
-  ASSERT_STREQ(cell::http::version_to_string(request.get_version()).GetConstCharPtr(), "HTTP/1.1");
-  ASSERT_STREQ(request.get_target().GetConstCharPtr(), "/index.php");
+  ASSERT_STREQ(cell::http::method_to_string(request.get_method()).get_const_char_ptr(), "POST");
+  ASSERT_STREQ(cell::http::version_to_string(request.get_version()).get_const_char_ptr(), "HTTP/1.1");
+  ASSERT_STREQ(request.get_target().get_const_char_ptr(), "/index.php");
   ASSERT_EQ(request.get_connection_type(), http::Connection::KeepAlive);
-  ASSERT_STREQ(request.get_user_agent().GetConstCharPtr(),
+  ASSERT_STREQ(request.get_user_agent().get_const_char_ptr(),
                "Mozilla/5.0 (Linux; Android 13;) AppleWebKit/537.36 (KHTML, like Gecko) "
                "Version/4.0 Chrome/107.0.5304.141");
-  ASSERT_STREQ(request.get_host().GetConstCharPtr(), "www.example.com");
-  ASSERT_STREQ(request.get_referrer().GetConstCharPtr(), "www.google.com");
+  ASSERT_STREQ(request.get_host().get_const_char_ptr(), "www.example.com");
+  ASSERT_STREQ(request.get_referrer().get_const_char_ptr(), "www.google.com");
   ASSERT_EQ(request.get_accept_encoding(),
             http::encoding::GZIP | http::encoding::DEFLATE | http::encoding::BROTLI);
   ASSERT_EQ(request.get_can_upgrade_insecure_connections(), true);
-  ASSERT_STREQ(request.get_body().GetConstCharPtr(), "Post Request Body");
+  ASSERT_STREQ(request.get_body().get_const_char_ptr(), "Post Request Body");
 }

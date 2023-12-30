@@ -3,7 +3,7 @@
 
 #include "scanner.hpp"
 
-#include "cell/log/Log.hpp"
+#include "cell/log/log.hpp"
 #include "charset.hpp"
 #include "memory.hpp"
 #include "string_slice.hpp"

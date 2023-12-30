@@ -6,6 +6,8 @@ MESSAGE(STATUS "[CELL] Library Include Directory: " ${CMAKE_CURRENT_SOURCE_DIR}/
 add_compile_definitions(DEBUG)
 add_compile_definitions(LOGGER_DEBUG)
 
+find_package(ZLIB REQUIRED)
+
 add_library(cell STATIC
         core/assert.hpp
         core/base.hpp
@@ -19,9 +21,8 @@ add_library(cell STATIC
         core/string_slice.hpp
         core/weak_string_cache.cpp
         core/weak_string_cache.hpp
-
-        log/Log.hpp
-
+        log/log.hpp
+        log/hexdump.cpp
         http/version.cpp
         http/version.hpp
         http/method.cpp
@@ -35,11 +36,15 @@ add_library(cell STATIC
         http/uri.cpp
         http/uri.hpp
         core/router.cpp
-        core/router.hpp http/encoding.cpp core/types.hpp encoding/Gzip.cpp encoding/Gzip.hpp)
+        core/router.hpp
+        http/encoding.cpp
+        core/types.hpp
+        encoding/gzip.cpp
+        encoding/gzip.hpp)
 
 
 target_include_directories(cell PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)
-
+target_link_libraries(cell PUBLIC ZLIB::ZLIB)
 
 # CompileOptions:
 # -----------------

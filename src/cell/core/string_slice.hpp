@@ -21,24 +21,24 @@ class StringSlice {
   StringSlice& operator=(StringSlice&& other) = default;
 
   [[nodiscard]] static StringSlice from_cstr(const char* data) noexcept;
-  [[nodiscard]] static StringSlice FromCString(const char* data, uint64_t len) noexcept;
+  [[nodiscard]] static StringSlice from_cstr(const char* data, uint64_t len) noexcept;
 
-  [[nodiscard]] const char* GetConstCharPtr() const { return reinterpret_cast<const char*>(data_); }
-  [[nodiscard]] const uint8_t* GetU8Ptr() const { return data_; }
-  [[nodiscard]] uint64_t get_length() const { return len_; }
+  [[nodiscard]] const char* get_const_char_ptr() const { return reinterpret_cast<const char*>(m_data); }
+  [[nodiscard]] const uint8_t* get_u8_ptr() const { return m_data; }
+  [[nodiscard]] uint64_t get_length() const { return m_len; }
   [[nodiscard]] uint8_t byte_at(uint64_t i) const {
-    CELL_ASSERT(i < len_);
+    CELL_ASSERT(i < m_len);
 
-    return data_[i];
+    return m_data[i];
   }
 
-  [[nodiscard]] bool Compare(StringSlice to) const noexcept;
-  [[nodiscard]] bool CompareIgnoreCase(StringSlice to) const noexcept;
-  [[nodiscard]] bool Contains(uint8_t byte) const noexcept;
+  [[nodiscard]] bool compare(StringSlice to) const noexcept;
+  [[nodiscard]] bool compare_ignore_case(StringSlice to) const noexcept;
+  [[nodiscard]] bool contains(uint8_t byte) const noexcept;
 
  private:
-  const uint8_t* data_{nullptr};
-  uint64_t len_{0};
+  const uint8_t* m_data{nullptr};
+  uint64_t m_len{0};
 };
 
 }  // namespace cell

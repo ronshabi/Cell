@@ -4,7 +4,7 @@
 
 #include "cell/core/charset.hpp"
 #include "cell/core/string.hpp"
-#include "cell/log/Log.hpp"
+#include "cell/log/log.hpp"
 
 namespace cell::http::encoding {
 
@@ -36,8 +36,8 @@ EncodingSet parse_from_request_header(const StringSlice slice) noexcept {
     switch (state) {
       case EncodingParserState::GetEncoding: {
         if (ch == ',' || end) {
-          if (buf.compare(StringSlice::from_cstr("gzip"))) {
-            CELL_LOG_DEBUG_SIMPLE("encoding: +gzip");
+          if (buf.compare(StringSlice::from_cstr("Gzip"))) {
+            CELL_LOG_DEBUG_SIMPLE("encoding: +Gzip");
             set |= GZIP;
           } else if (buf.compare(StringSlice::from_cstr("deflate"))) {
             CELL_LOG_DEBUG_SIMPLE("encoding: +deflate");

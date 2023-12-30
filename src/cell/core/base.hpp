@@ -6,9 +6,11 @@
 
 #include <cstdint>
 
+#include "types.hpp"
+
 namespace cell {
 
-[[nodiscard]] constexpr uint64_t round_up_8(const uint64_t num) noexcept {
+[[nodiscard]] constexpr u64 round_up_8(const u64 num) noexcept {
   if (num % 8 == 0) {
     return num;
   }
@@ -16,13 +18,14 @@ namespace cell {
   return num - num % 8 + 8;
 }
 
-[[nodiscard]] constexpr uint64_t round_up_32(const uint64_t num) noexcept {
+[[nodiscard]] constexpr u64 round_up_32(const u64 num) noexcept {
   if (num % 32 == 0) {
     return num;
   }
 
   return num - num % 32 + 32;
 }
+
 
 }  // namespace cell
 
